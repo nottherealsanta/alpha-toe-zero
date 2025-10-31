@@ -25,6 +25,7 @@ EVAL_GAMES = 50  # Number of games for evaluation
 EVAL_SIMULATIONS = N_SIMULATIONS  # MCTS simulations during evaluation
 EVAL_INTERVAL = 10  # Evaluate every N iterations
 SAVE_INTERVAL = 10  # Save checkpoint every N iterations
+REPLAY_CAPACITY = 50000  # Maximum number of samples retained in replay buffer
 
 # Temperature annealing configuration
 TEMPERATURE_INITIAL = 1.0          # Exploration temperature for first moves / early iterations
@@ -56,16 +57,24 @@ class MCTSNode:
             return 0
         return self.value_sum / self.visit_count
     
+    def q_from_parent_view(self):
+        """Return Q value from the parent's perspective.
+        self.value() is from this node's perspective (player to move when node was created).
+        The parent needs the opposite sign when deciding (because after parent moves,
+        perspective flips)."""
+        return -self.value()
+
     def ucb_score(self, c_puct=1.0):
-        if self.visit_count == 0:
-            return float('inf')
-        
-        exploration = (c_puct * self.prior * 
-                      np.sqrt(self.parent.visit_count) / (1 + self.visit_count))
-        return self.value() + exploration
+        """PUCT score combining exploitation (Q) and exploration (U) without infinities.
+        Uses parent's visit count for scaling and correct sign for Q from parent's view."""
+        parent_N = 1 + (self.parent.visit_count if self.parent else 0)
+        U = c_puct * self.prior * (np.sqrt(parent_N) / (1 + self.visit_count))
+        Q = self.q_from_parent_view()
+        return Q + U
     
     def select_child(self, c_puct=1.0):
-        return max(self.children.values(), key=lambda child: child.ucb_score(c_puct))
+        """Select child with maximum PUCT score. Ties broken implicitly by prior via U."""
+        return max(self.children.values(), key=lambda ch: ch.ucb_score(c_puct))
     
     def expand(self, game, action_probs):
         for action, prob in action_probs:
@@ -95,61 +104,44 @@ class AlphaZeroMCTS:
     
     def search(self, root_state):
         root = MCTSNode(root_state)
-        
-        # Perform an initial expansion of root with Dirichlet noise for exploration
+
+        # Expand root with Dirichlet noise (no backup here)
         game_copy_root = self.game.copy()
         if not game_copy_root.over():
-            value_root, action_probs_root = self.model.predict(game_copy_root)
-            legal_actions_root = game_copy_root.valid_moves()
-            legal_probs_root = [(a, action_probs_root[a]) for a in legal_actions_root]
-            total_prob_root = sum(p for _, p in legal_probs_root)
-            if total_prob_root > 0:
-                legal_probs_root = [(a, p/total_prob_root) for a, p in legal_probs_root]
-            # Dirichlet noise parameters (AlphaZero style)
-            if len(legal_probs_root) > 0:
-                alpha = 0.3  # For 9 actions, moderate concentration
-                eps = 0.25
-                noise = np.random.dirichlet([alpha] * len(legal_probs_root))
-                legal_probs_root = [
-                    (a, (1 - eps) * p + eps * n) for (a, p), n in zip(legal_probs_root, noise)
-                ]
-            root.expand(game_copy_root, legal_probs_root)
-            root.backup(value_root)
-        
+            v_root, policy_root = self.model.predict(game_copy_root)
+            legal = game_copy_root.valid_moves()
+            probs = [(a, policy_root[a]) for a in legal]
+            s = sum(p for _, p in probs)
+            if s > 0:
+                probs = [(a, p / s) for a, p in probs]
+            if probs:
+                alpha, eps = 0.3, 0.25
+                noise = np.random.dirichlet([alpha] * len(probs))
+                probs = [(a, (1 - eps) * p + eps * n) for (a, p), n in zip(probs, noise)]
+            root.expand(game_copy_root, probs)
+
         for _ in range(self.num_simulations):
             node = root
             game_copy = self.game.copy()
-            
-            # Selection: traverse down to leaf
-            path = [node]
+
             while node.is_expanded() and not game_copy.over():
                 node = node.select_child(self.c_puct)
                 game_copy.make_move(node.action)
-                path.append(node)
-            
-            # Expansion and Evaluation
+
             if not game_copy.over():
-                # Get neural network predictions
-                value, action_probs = self.model.predict(game_copy)
-                
-                # Expand node with all legal actions
-                legal_actions = game_copy.valid_moves()
-                legal_probs = [(action, action_probs[action]) for action in legal_actions]
-                
-                # Normalize probabilities for legal actions only
-                total_prob = sum(prob for _, prob in legal_probs)
-                if total_prob > 0:
-                    legal_probs = [(action, prob/total_prob) for action, prob in legal_probs]
-                
-                node.expand(game_copy, legal_probs)
-                
-                # Backup the value
-                node.backup(value)
+                v, policy = self.model.predict(game_copy)  # v is from player-to-move view
+                legal = game_copy.valid_moves()
+                probs = [(a, policy[a]) for a in legal]
+                s = sum(p for _, p in probs)
+                if s > 0:
+                    probs = [(a, p / s) for a, p in probs]
+                node.expand(game_copy, probs)
+                node.backup(v)  # signed during recursion
             else:
-                # Terminal node - backup actual game result
-                terminal_value = game_copy.score()
-                node.backup(terminal_value)
-        
+                # Score is winner in {+1,-1}, convert to player-to-move view
+                terminal_v = game_copy.score() * game_copy.current_player
+                node.backup(terminal_v)
+
         return root
     
     def get_action_probabilities(self, root_state, temperature=1.0):
@@ -182,9 +174,9 @@ class ResidualBlock(nn.Module):
     def __init__(self, hidden_size: int, dropout: float = DROPOUT):
         super(ResidualBlock, self).__init__()
         self.fc1 = nn.Linear(hidden_size, hidden_size)
-        self.bn1 = nn.BatchNorm1d(hidden_size)
+        self.bn1 = nn.LayerNorm(hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.bn2 = nn.BatchNorm1d(hidden_size)
+        self.bn2 = nn.LayerNorm(hidden_size)
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, x):
@@ -215,7 +207,7 @@ class AlphaZeroNet(nn.Module):
         
         # Initial projection layer
         self.input_fc = nn.Linear(18, hidden_size)  # 3x3x2 = 18 input features
-        self.input_bn = nn.BatchNorm1d(hidden_size)
+        self.input_bn = nn.LayerNorm(hidden_size)
         
         # Residual blocks
         self.res_blocks = nn.ModuleList([
@@ -225,14 +217,14 @@ class AlphaZeroNet(nn.Module):
         
         # Value head
         self.value_fc1 = nn.Linear(hidden_size, 128)
-        self.value_bn1 = nn.BatchNorm1d(128)
+        self.value_bn1 = nn.LayerNorm(128)
         self.value_fc2 = nn.Linear(128, 64)
         self.value_fc3 = nn.Linear(64, 1)
         self.value_dropout = nn.Dropout(DROPOUT)
         
         # Policy head  
         self.policy_fc1 = nn.Linear(hidden_size, 128)
-        self.policy_bn1 = nn.BatchNorm1d(128)
+        self.policy_bn1 = nn.LayerNorm(128)
         self.policy_fc2 = nn.Linear(128, 64)
         self.policy_fc3 = nn.Linear(64, action_size)
         self.policy_dropout = nn.Dropout(DROPOUT)
@@ -286,8 +278,9 @@ class AlphaZeroModel:
         # Learning rate scheduler
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=LR_STEP_SIZE, gamma=LR_GAMMA)
         
-        # Training data buffer
+        # Training replay buffer
         self.training_data = []
+        self.replay_capacity = REPLAY_CAPACITY
     
     def encode_state(self, game):
         """Convert game state to neural network input format.
@@ -337,126 +330,110 @@ class AlphaZeroModel:
         return exp_x / np.sum(exp_x)
     
     def compute_loss(self, batch_states, batch_values, batch_policies):
-        """Compute loss for a batch of training data"""
+        """Compute loss for a batch of training data with legality masking on policy head."""
         values, policy_logits = self.net(batch_states)
-        
-        # Value loss (MSE)
-        value_loss = F.mse_loss(values, batch_values)
-        
-        # Policy loss (cross-entropy)
+
+        # Derive legality mask from planes: empty if neither plane occupies the cell
+        with torch.no_grad():
+            # batch_states shape: [B, 3, 3, 2] for 3x3; generalizes by flattening
+            occ = batch_states[..., 0] + batch_states[..., 1]  # [B, 3, 3]
+            legal_mask = (occ.view(occ.size(0), -1) == 0)      # [B, 9] True=legal
+
+        # Mask logits for illegal moves
+        policy_logits = policy_logits.masked_fill(~legal_mask, -1e9)
         log_probs = F.log_softmax(policy_logits, dim=1)
+
+        # Loss components
+        value_loss = F.mse_loss(values, batch_values)
         policy_loss = -torch.mean(torch.sum(batch_policies * log_probs, dim=1))
-        
-        # Total loss
         total_loss = value_loss + policy_loss
-        
         return total_loss, value_loss, policy_loss
     
     def train_step(self, batch_states, batch_values, batch_policies):
         """Single training step"""
         self.net.train()
         self.optimizer.zero_grad()
-        
         total_loss, value_loss, policy_loss = self.compute_loss(batch_states, batch_values, batch_policies)
-        
         total_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.net.parameters(), 1.0)
         self.optimizer.step()
-        
         return total_loss.item(), value_loss.item(), policy_loss.item()
     
     def add_training_data(self, state, action_probs, value):
-        """Add training example to buffer.
-        State should be either a game object or (board_tuple, player) pair to preserve perspective.
-        """
+        """Add training example to replay buffer and enforce capacity.
+        State should be either a game object or (board_tuple, player) pair to preserve perspective."""
         self.training_data.append((state, action_probs, value))
+        if len(self.training_data) > self.replay_capacity:
+            self.training_data = self.training_data[-self.replay_capacity:]
     
     def train(self, batch_size: int = BATCH_SIZE, epochs: int = EPOCHS):
-        """Improved training with more epochs and larger batches"""
+        """Train using replay buffer sampling; keep buffer contents across iterations."""
         if len(self.training_data) < batch_size:
             return
-        
-        # Prepare training data (same as before)
+
+        # Sample a working subset (cap at 4096 for efficiency)
+        subset_size = min(len(self.training_data), 4096)
+        idx = torch.randperm(len(self.training_data))[:subset_size]
+        batch_samples = [self.training_data[i] for i in idx.tolist()]
+
         states = []
         values = []
         policies = []
-        
-        for state, action_probs, value in self.training_data:
-            # state may be game object or (board_tuple, player)
-            encoded_state = self.encode_state(state)
-            
-            states.append(encoded_state)
+        for state, action_probs, value in batch_samples:
+            states.append(self.encode_state(state))
             values.append(value)
-            
-            if isinstance(action_probs, dict):
-                policy = [action_probs.get(i, 0.0) for i in range(self.action_size)]
-            else:
-                policy = list(action_probs)
-            policies.append(policy)
-        
-        # Convert to PyTorch tensors (convert to numpy arrays first to avoid warning)
+            policies.append([
+                action_probs.get(i, 0.0) if isinstance(action_probs, dict) else action_probs[i]
+                for i in range(self.action_size)
+            ])
+
         states = torch.FloatTensor(np.array(states))
         values = torch.FloatTensor(np.array(values))
         policies = torch.FloatTensor(np.array(policies))
-        
-        # Training loop with more epochs
+
         dataset_size = len(states)
         best_loss = float('inf')
-        
+
         for epoch in range(epochs):
-            # Shuffle data
             indices = torch.randperm(dataset_size)
             states_shuffled = states[indices]
             values_shuffled = values[indices]
             policies_shuffled = policies[indices]
-            
-            # Mini-batch training
+
             total_loss = 0
             total_value_loss = 0
             total_policy_loss = 0
             num_batches = 0
-            
+
             for i in range(0, dataset_size, batch_size):
                 batch_end = min(i + batch_size, dataset_size)
-                
-                # Skip batches with only 1 sample (BatchNorm requires batch_size > 1)
-                if batch_end - i <= 1:
-                    continue
-                    
                 batch_states = states_shuffled[i:batch_end]
                 batch_values = values_shuffled[i:batch_end]
                 batch_policies = policies_shuffled[i:batch_end]
-                
-                loss, value_loss, policy_loss = self.train_step(
-                    batch_states, batch_values, batch_policies
-                )
-                
+
+                loss, value_loss, policy_loss = self.train_step(batch_states, batch_values, batch_policies)
                 total_loss += loss
                 total_value_loss += value_loss
                 total_policy_loss += policy_loss
                 num_batches += 1
-            
-            # Handle case where no batches were processed
+
             if num_batches == 0:
                 print(f"Warning: No valid batches in epoch {epoch}")
                 continue
-                
+
             avg_loss = total_loss / num_batches
             avg_value_loss = total_value_loss / num_batches
             avg_policy_loss = total_policy_loss / num_batches
-            
+
             if epoch % 2 == 0 or epoch == epochs - 1:
                 print(f"Epoch {epoch}: Loss={avg_loss:.4f}, Value={avg_value_loss:.4f}, Policy={avg_policy_loss:.4f}")
-            
-            # Early stopping
+
             if avg_loss < best_loss:
                 best_loss = avg_loss
-            
-            # Update learning rate
+
             self.scheduler.step()
-        
-        # Clear training data
-        self.training_data.clear()
-        print(f"Training complete. Best loss: {best_loss:.4f}")
+
+        print(f"Training complete. Best loss (subset): {best_loss:.4f}")
     
     def save_model(self, filepath: str):
         """Save the trained model to a file"""

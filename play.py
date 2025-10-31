@@ -56,7 +56,7 @@ def get_ai_move(game, model, mcts_simulations=100):
     print(f"AI chooses position {action}")
     return action
 
-def play_game(model_path="models/alphazero_iter_160.pth", human_first=True, mcts_simulations=100):
+def play_game(model_path="models/alphazero_iter_10.pth", human_first=True, mcts_simulations=100):
     """Play an interactive game against the AI"""
     
     # Load the trained model
