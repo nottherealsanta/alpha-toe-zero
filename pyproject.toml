@@ -5,6 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "flax>=0.11.0",
-    "jax>=0.7.0",
+    "torch>=2.0.0",
+    "numpy>=1.21.0",
 ]
