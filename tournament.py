@@ -250,7 +250,11 @@ def run_tournament(model_paths: List[str], games_per_pair: int, mcts_simulations
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="AlphaZero Tic-Tac-Toe tournament evaluator (Elo ratings)")
-    p.add_argument('--models', nargs='+', required=True, help='List of model checkpoint paths')
+    p.add_argument('--models', nargs='+', help='Explicit list of model checkpoint paths (.pth)')
+    p.add_argument('--models-dir', nargs='+', help='One or more directories to scan for model checkpoints (.pth)')
+    p.add_argument('--recursive', action='store_true', help='Recursively scan provided --models-dir directories')
+    p.add_argument('--sort', choices=['name','mtime','iteration'], default='iteration', help='Sorting strategy for discovered models')
+    p.add_argument('--limit', type=int, default=None, help='Optional limit on number of discovered models after sorting')
     p.add_argument('--games-per-pair', type=int, default=10, help='Number of games per model pair')
     p.add_argument('--mcts-simulations', type=int, default=100, help='MCTS simulations per move')
     p.add_argument('--k-factor', type=float, default=32.0, help='Elo K-factor')
@@ -268,8 +272,53 @@ def main(argv: List[str]):
     os.makedirs(os.path.dirname(args.history_csv), exist_ok=True)
     os.makedirs(os.path.dirname(args.ratings_csv), exist_ok=True)
 
+    # Auto-discovery if models not explicitly supplied
+    model_paths: List[str] = []
+    if args.models:
+        model_paths.extend(args.models)
+    if args.models_dir:
+        for d in args.models_dir:
+            if not os.path.isdir(d):
+                print(f"[WARN] Not a directory: {d}")
+                continue
+            if args.recursive:
+                for root, _, files in os.walk(d):
+                    for f in files:
+                        if f.endswith('.pth'):
+                            model_paths.append(os.path.join(root, f))
+            else:
+                for f in os.listdir(d):
+                    full = os.path.join(d, f)
+                    if os.path.isfile(full) and f.endswith('.pth'):
+                        model_paths.append(full)
+    if not model_paths:
+        print("No models provided or discovered. Use --models or --models-dir.")
+        return
+    # Deduplicate
+    model_paths = list(dict.fromkeys(model_paths))
+
+    # Sorting strategies
+    def extract_iteration(path: str) -> int:
+        base = os.path.basename(path)
+        # Expect pattern alphazero_iter_<N>.pth
+        for token in base.replace('.', '_').split('_'):
+            if token.isdigit():
+                return int(token)
+        return -1
+    if args.sort == 'name':
+        model_paths.sort(key=lambda p: os.path.basename(p))
+    elif args.sort == 'mtime':
+        model_paths.sort(key=lambda p: os.path.getmtime(p))
+    elif args.sort == 'iteration':
+        model_paths.sort(key=extract_iteration)
+    if args.limit is not None:
+        model_paths = model_paths[:args.limit]
+    print(f"Discovered {len(model_paths)} models for tournament.")
+    for p in model_paths:
+        print(f" - {p}")
+
     run_tournament(
-        model_paths=args.models,
+        model_paths=model_paths,
         games_per_pair=args.games_per_pair,
         mcts_simulations=args.mcts_simulations,
         k_factor=args.k_factor,

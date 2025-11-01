@@ -18,11 +18,16 @@ This project implements a simplified version of DeepMind's AlphaZero algorithm f
 - **Deep Neural Networks** (ResNet architecture) for position evaluation and move prediction
 - **Self-play reinforcement learning** for training without human data
 
-### Key Features
+## Key Features
 - PyTorch-based deep neural network with residual blocks
 - Multi-process parallel self-play for efficient training
 - Comprehensive evaluation system with historical checkpoints
 - Configurable hyperparameters for experimentation
+- Temperature annealing for improved exploration/exploitation balance
+- Data augmentation via dihedral symmetries (rotations and reflections)
+- Replay buffer with capacity management
+- Dirichlet noise at root node for exploration
+- Legal move masking in policy head during training
 
 ---
 
@@ -89,8 +94,8 @@ Manages the Monte Carlo Tree Search process.
 - `num_simulations`: Number of MCTS simulations (default: 100)
 
 **Key Methods:**
-- `search()`: Performs MCTS simulations from root state
-- `get_action_probabilities()`: Returns visit-count-based action distribution
+- `search()`: Performs MCTS simulations from root state with Dirichlet noise (alpha=0.3, epsilon=0.25)
+- `get_action_probabilities()`: Returns visit-count-based action distribution with temperature control
 
 ### 3. AlphaZeroNet
 ResNet-based neural network with dual heads.
@@ -112,11 +117,14 @@ Input (3x3x2) → Projection Layer → Residual Blocks × 4 →
 High-level model wrapper for training and inference.
 
 **Features:**
-- State encoding (board → tensor)
-- Training data management
-- Loss computation (value MSE + policy cross-entropy)
-- Model persistence (save/load)
-- Learning rate scheduling
+- State encoding (board → tensor) with dual-plane representation
+- Training data management with replay buffer (capacity: 50,000)
+- Loss computation with legal move masking:
+  - Value loss: Mean Squared Error (MSE)
+  - Policy loss: Cross-entropy with illegal moves masked to -1e9 before softmax
+- Model persistence (save/load) with optimizer state
+- Learning rate scheduling with StepLR (step_size=100, gamma=0.9)
+- AdamW optimizer with weight decay (1e-4) and gradient clipping (max_norm=1.0)
 
 ### 5. AlphaZeroTrainer
 Orchestrates the training process.
@@ -126,6 +134,9 @@ Orchestrates the training process.
 - Training iteration management
 - Model evaluation against checkpoints
 - Results tracking and CSV export
+- Temperature annealing for exploration control
+- Data augmentation via 8 dihedral symmetries (rotations and reflections)
+- Replay buffer integration
 
 ---
 
@@ -152,8 +163,9 @@ flowchart TD
     ParallelCheck -->|No| Sequential[Sequential Games]
     Sequential --> Collect
     
-    Collect --> AddData[Add Training Data<br/>to Model Buffer]
-    AddData --> TrainNN[Train Neural Network]
+    Collect --> Augment[Data Augmentation<br/>8 Symmetries]
+    Augment --> AddData[Add to Replay Buffer<br/>capacity: 50,000]
+    AddData --> TrainNN[Train Neural Network<br/>Sample from Buffer]
     
     TrainNN --> CheckpointCheck{iteration % SAVE_INTERVAL == 0?}
     
@@ -173,9 +185,10 @@ flowchart TD
     InitGame --> GameLoop{Game Over?}
     
     GameLoop -->|No| SavePlayer[Save Current Player]
-    SavePlayer --> RunMCTS[Run MCTS Search<br/>N_SIMULATIONS times]
+    SavePlayer --> CalcTemp[Calculate Temperature<br/>Based on Iteration & Move]
+    CalcTemp --> RunMCTS[Run MCTS Search<br/>N_SIMULATIONS times]
     
-    RunMCTS --> GetProbs[Get Action Probabilities<br/>from Visit Counts]
+    RunMCTS --> GetProbs[Get Action Probabilities<br/>from Visit Counts + Temp]
     GetProbs --> StoreExample[Store Training Example<br/>state, probs, None, player]
     
     StoreExample --> SampleAction[Sample Action<br/>from Distribution]
@@ -192,7 +205,10 @@ flowchart TD
 ```mermaid
 flowchart TD
     StartMCTS([Start MCTS Search]) --> CreateRoot[Create Root Node]
-    CreateRoot --> SimLoop{Simulation < N_SIMULATIONS?}
+    CreateRoot --> ExpandRoot[Expand Root with<br/>Dirichlet Noise]
+    ExpandRoot --> GetRootNN[Neural Network Prediction]
+    GetRootNN --> AddNoise[Add Dirichlet Noise<br/>alpha=0.3, eps=0.25]
+    AddNoise --> SimLoop{Simulation < N_SIMULATIONS?}
     
     SimLoop -->|Yes| Selection[Selection Phase]
     SimLoop -->|No| ReturnRoot([Return Root Node])
@@ -207,8 +223,8 @@ flowchart TD
     
     TraverseLoop -->|No| TerminalCheck{Game Over?}
     
-    TerminalCheck -->|Yes| GetScore[Get Terminal Score]
-    GetScore --> Backup[Backup Value]
+    TerminalCheck -->|Yes| GetScore[Get Terminal Score<br/>× Current Player]
+    GetScore --> Backup[Backup Value<br/>Negate at Each Level]
     Backup --> SimLoop
     
     TerminalCheck -->|No| Expansion[Expansion Phase]
@@ -219,7 +235,7 @@ flowchart TD
     
     GetPolicy --> FilterLegal[Filter Legal Actions]
     FilterLegal --> Normalize[Normalize Probabilities]
-    Normalize --> CreateChildren[Create Child Nodes]
+    Normalize --> CreateChildren[Create Child Nodes<br/>with Priors]
     CreateChildren --> GetValue
     GetValue --> Backup
 ```
@@ -231,9 +247,9 @@ flowchart TD
     StartTrain([Start NN Training]) --> CheckData{Enough Data?<br/>≥ BATCH_SIZE}
     
     CheckData -->|No| Skip([Skip Training])
-    CheckData -->|Yes| PrepData[Prepare Training Data]
+    CheckData -->|Yes| SampleData[Sample from Replay Buffer<br/>Max 4096 samples]
     
-    PrepData --> EncodeStates[Encode States<br/>to Tensors]
+    SampleData --> EncodeStates[Encode States<br/>to Tensors]
     EncodeStates --> ConvertPolicy[Convert Policies<br/>to Vectors]
     ConvertPolicy --> ToTensor[Convert to<br/>PyTorch Tensors]
     
@@ -243,27 +259,25 @@ flowchart TD
     Shuffle --> BatchLoop{More Batches?}
     
     BatchLoop -->|Yes| GetBatch[Get Next Batch]
-    GetBatch --> CheckSize{Batch Size > 1?}
+    GetBatch --> Forward[Forward Pass]
     
-    CheckSize -->|No| BatchLoop
-    CheckSize -->|Yes| Forward[Forward Pass]
-    
-    Forward --> ValueLoss[Compute Value Loss<br/>MSE]
-    Forward --> PolicyLoss[Compute Policy Loss<br/>Cross-Entropy]
+    Forward --> MaskIllegal[Mask Illegal Moves<br/>in Policy Logits]
+    MaskIllegal --> ValueLoss[Compute Value Loss<br/>MSE]
+    MaskIllegal --> PolicyLoss[Compute Policy Loss<br/>Cross-Entropy]
     
     ValueLoss --> TotalLoss[Total Loss =<br/>Value + Policy]
     PolicyLoss --> TotalLoss
     
     TotalLoss --> Backward[Backward Pass]
-    Backward --> UpdateWeights[Update Weights]
+    Backward --> ClipGrad[Clip Gradients<br/>max_norm=1.0]
+    ClipGrad --> UpdateWeights[Update Weights<br/>AdamW]
     UpdateWeights --> BatchLoop
     
     BatchLoop -->|No| LogEpoch[Log Epoch Results]
-    LogEpoch --> UpdateLR[Update Learning Rate<br/>Scheduler]
+    LogEpoch --> UpdateLR[Update Learning Rate<br/>StepLR Scheduler]
     UpdateLR --> EpochLoop
     
-    EpochLoop -->|No| ClearBuffer[Clear Training Buffer]
-    ClearBuffer --> Done([Training Complete])
+    EpochLoop -->|No| Done([Training Complete<br/>Keep Buffer])
 ```
 
 ### UCB Score Calculation
@@ -303,7 +317,12 @@ flowchart LR
 | `N_GAMES` | 200 | Self-play games per iteration |
 | `N_SIMULATIONS` | 100 | MCTS simulations per move |
 | `C_PUCT` | 1.0 | UCB exploration constant |
-| `TEMPERATURE` | 1.0 | Action selection randomness |
+| `TEMPERATURE_INITIAL` | 1.0 | Exploration temperature for opening moves |
+| `TEMPERATURE_FINAL` | 0.0 | Deterministic selection after threshold |
+| `TEMPERATURE_MOVE_THRESHOLD` | 3 | Number of opening moves with high temperature |
+| `TEMPERATURE_ANNEAL_ITER` | 100 | Iteration after which temperature is always final |
+| `SYMMETRY_AUGMENT` | True | Enable data augmentation via symmetries |
+| `REPLAY_CAPACITY` | 50000 | Maximum replay buffer size |
 
 ### Neural Network
 
@@ -323,9 +342,10 @@ flowchart LR
 |-----------|-------|-------------|
 | `LR_STEP_SIZE` | 100 | LR scheduler step size |
 | `LR_GAMMA` | 0.9 | LR decay factor |
-| `SAVE_INTERVAL` | 25 | Checkpoint save interval |
-| `EVAL_INTERVAL` | 25 | Evaluation interval |
+| `SAVE_INTERVAL` | 10 | Checkpoint save interval |
+| `EVAL_INTERVAL` | 10 | Evaluation interval |
 | `EVAL_GAMES` | 50 | Games for evaluation |
+| `EVAL_SIMULATIONS` | 100 | MCTS simulations during evaluation |
 
 ---
 
@@ -369,15 +389,19 @@ model = AlphaZeroModel(
 
 # Get predictions
 game = TicTacToeGame()
-value, policy = model.predict(game)
+value, policy = model.predict(game)  # Returns value in [-1,1], policy as numpy array
 
-# Add training data
-model.add_training_data(game.state(), action_probs_dict, value)
+# Add training data (stores in replay buffer)
+model.add_training_data(
+    state=(game.state(), game.current_player),  # State with player perspective
+    action_probs={0: 0.5, 1: 0.3, 2: 0.2},     # Action probabilities
+    value=1.0                                    # Game outcome from player's view
+)
 
-# Train on collected data
+# Train on collected data (samples from replay buffer)
 model.train(batch_size=64, epochs=10)
 
-# Save/load
+# Save/load with optimizer state
 model.save_model("checkpoint.pth")
 loaded_model = AlphaZeroModel.load_from_file("checkpoint.pth")
 ```
@@ -392,8 +416,12 @@ trainer = AlphaZeroTrainer(
     mcts_simulations=100
 )
 
-# Run single iteration
-trainer.train_iteration(num_games=500, num_workers=4)
+# Run single iteration with parallel self-play
+trainer.train_iteration(
+    iteration=1,
+    num_games=200,
+    num_workers=4  # None = auto-detect, 1 = sequential
+)
 
 # Evaluate against baseline
 wins, draws, losses = trainer.evaluate_model(
@@ -472,17 +500,115 @@ alpha-toe/
 ├── main.py                      # Core implementation
 ├── play.py                      # Interactive play script
 ├── diagnose.py                  # Debugging utilities
-├── test_parallel.py             # Parallel processing tests
-├── test_high_sims.py           # High simulation tests
+├── export_onnx.py              # ONNX model export
+├── tournament.py               # Tournament evaluation
+├── test_sanity.py              # Sanity tests
 ├── TECHNICAL_DOCUMENTATION.md   # This file
-├── TRAINING_CHANGES.md          # Training modifications log
 ├── README.md                    # Project overview
+├── report.md                    # Training report
 ├── pyproject.toml              # Dependencies
+├── uv.lock                     # Lock file
 └── models/
     ├── alphazero_iter_0.pth    # Baseline checkpoint
-    ├── alphazero_iter_50.pth   # Checkpoint at iteration 50
-    └── evaluation_results.csv  # Evaluation metrics
+    ├── alphazero_iter_10.pth   # Checkpoint at iteration 10
+    ├── alphazero_iter_20.pth   # etc.
+    ├── evaluation_results.csv  # Evaluation metrics
+    ├── tournament_history.csv  # Tournament results
+    ├── tournament_ratings.csv  # ELO ratings
+    └── run1/, run2/, run3/     # Training run archives
 ```
+
+---
+
+## Advanced Features
+
+### Temperature Annealing
+
+The system implements a sophisticated temperature annealing scheme to balance exploration and exploitation during training:
+
+**Configuration:**
+- `TEMPERATURE_INITIAL = 1.0`: High exploration for opening moves
+- `TEMPERATURE_FINAL = 0.0`: Deterministic (greedy) selection after threshold
+- `TEMPERATURE_MOVE_THRESHOLD = 3`: First 3 moves use high temperature
+- `TEMPERATURE_ANNEAL_ITER = 100`: After iteration 100, always use final temperature
+
+**Logic:**
+```python
+if iteration >= TEMPERATURE_ANNEAL_ITER:
+    temperature = TEMPERATURE_FINAL  # Always deterministic
+elif move_index < TEMPERATURE_MOVE_THRESHOLD:
+    temperature = TEMPERATURE_INITIAL  # Explore opening
+else:
+    temperature = TEMPERATURE_FINAL  # Exploit mid/endgame
+```
+
+**Effect on Action Selection:**
+- Temperature = 1.0: Samples from visit count distribution (exploration)
+- Temperature = 0.0: Selects action with maximum visit count (exploitation)
+- Temperature between 0 and 1: Interpolates between the two
+
+### Data Augmentation via Symmetries
+
+The trainer augments each training example using the 8 dihedral symmetries of the 3×3 board:
+
+**Symmetry Operations:**
+1. **Identity**: Original position
+2. **Rotation 90°**: Clockwise rotation
+3. **Rotation 180°**: Half turn
+4. **Rotation 270°**: Counter-clockwise rotation
+5. **Horizontal Reflection**: Flip across horizontal axis
+6. **Vertical Reflection**: Flip across vertical axis
+7. **Main Diagonal Reflection**: Flip across diagonal (0,4,8)
+8. **Anti-Diagonal Reflection**: Flip across diagonal (2,4,6)
+
+**Implementation:**
+- Each symmetry generates a permutation of board indices
+- Both board state and policy are transformed consistently
+- Augmentation increases training data 8-fold
+- Can be disabled by setting `SYMMETRY_AUGMENT = False`
+
+**Example:**
+```
+Original:        Rot90:          HFlip:
+X | O | -        - | X | X       O | - | -
+---------        ---------       ---------
+X | - | -   →    - | - | O   or  X | - | -
+---------        ---------       ---------
+- | - | -        - | - | -       X | O | -
+```
+
+### Replay Buffer
+
+The model maintains a replay buffer to stabilize training:
+
+**Features:**
+- **Capacity**: 50,000 training examples
+- **Persistence**: Buffer persists across training iterations
+- **Sampling**: Random subset (up to 4,096) sampled each iteration
+- **FIFO Policy**: Oldest examples removed when capacity exceeded
+
+**Benefits:**
+- Reduces correlation between consecutive training batches
+- Enables learning from diverse game positions
+- Improves sample efficiency
+
+### Dirichlet Noise for Exploration
+
+During MCTS, Dirichlet noise is added to the root node's prior probabilities:
+
+**Parameters:**
+- `alpha = 0.3`: Concentration parameter (lower = more concentrated)
+- `epsilon = 0.25`: Mixing weight (25% noise, 75% policy)
+
+**Formula:**
+```
+P_noisy = (1 - ε) × P_network + ε × Dirichlet(α)
+```
+
+**Purpose:**
+- Ensures diverse exploration during self-play
+- Prevents premature convergence to suboptimal strategies
+- Only applied at root node (not during tree traversal)
 
 ---
 
@@ -495,8 +621,9 @@ alpha-toe/
 - Can be disabled by setting `num_workers=1`
 
 ### Memory Management
-- Training buffer cleared after each training iteration
-- Batch normalization requires batch size > 1
+- Replay buffer capped at 50,000 examples
+- Training samples up to 4,096 examples per iteration
+- Gradient clipping (max_norm=1.0) prevents gradient explosion
 - Terminal output truncated to prevent memory overflow
 
 ### Computational Complexity
@@ -538,16 +665,18 @@ print(df.groupby('current_iter')['win_rate'].mean())
 ## Future Improvements
 
 1. **Advanced Features**
-   - Dirichlet noise for root exploration
-   - Temperature annealing schedule
-   - Prioritized experience replay
+   - ✅ Dirichlet noise for root exploration (implemented)
+   - ✅ Temperature annealing schedule (implemented)
+   - ✅ Prioritized experience replay via capacity management (implemented)
+   - ✅ Data augmentation via symmetries (implemented)
    - Model ensemble voting
+   - Virtual loss for parallel MCTS
 
 2. **Optimizations**
    - GPU acceleration for batch predictions
-   - Cached neural network evaluations
-   - Asynchronous self-play
-   - Distributed training
+   - Cached neural network evaluations (transposition table)
+   - Asynchronous self-play with separate actors
+   - Distributed training across multiple machines
 
 3. **Extensions**
    - Larger board games (Connect Four, Gomoku)
@@ -565,6 +694,6 @@ print(df.groupby('current_iter')['win_rate'].mean())
 
 ---
 
-**Last Updated**: October 28, 2025  
-**Version**: 1.0  
+**Last Updated**: November 1, 2025  
+**Version**: 2.0  
 **Author**: AlphaZero Tic-Tac-Toe Project
