@@ -5,7 +5,7 @@ import numpy as np
 # import your classes
 from main import AlphaZeroModel, AlphaZeroNet  # adjust import
 
-ONNX_PATH = "model.onnx"
+ONNX_PATH = "models/model.onnx"
 CKPT_PATH = "models/alphazero_iter_40.pth"  # or any .pth you saved
 
 def load_model(ckpt_path):
