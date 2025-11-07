@@ -10,3 +10,4 @@ wheels/
 .venv
 
 models/
+models_4x4x4/

@@ -10,6 +10,22 @@ https://medium.com/applied-data-science/alphago-zero-explained-in-one-diagram-36
 https://suragnair.github.io/posts/alphazero.html
 https://www.nature.com/articles/nature24270.epdf?author_access_token=VJXbVjaSHxFoctQQ4p2k4tRgN0jAjWel9jnR3ZoTv0PVW4gB86EEpGqTRDtpIz-2rmo8-KG06gqVobU5NSCFeHILHcVFUeMsbvwS-lxjqQGg98faovwjxeTUgZAUMnRQ
 
+## Progress Bars (tqdm)
+
+Set the environment variable `PROGRESS=1` to enable tqdm progress bars during training (`qubic.py`) and Elo tournaments. Example:
+
+```bash
+PROGRESS=1 uv run qubic.py
+```
+
+Bars shown:
+* Iterations loop
+* Self-play games (single-process) or multiprocessing aggregate
+* MCTS simulations (only when `num_simulations >= 50` to avoid excessive output)
+* Elo tournament pair and game loops
+
+Unset (or `PROGRESS=0`) for clean, minimal console output.
+
 ## Tournament Elo Evaluation
 
 Use `tournament.py` to run a round-robin Elo tournament between multiple saved checkpoints.
