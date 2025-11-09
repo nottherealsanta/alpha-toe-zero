@@ -9,4 +9,5 @@ dependencies = [
     "numpy>=1.21.0",
     "onnx>=1.19.1",
     "tqdm>=4.0.0",
+    "jax>=0.8.0",
 ]
