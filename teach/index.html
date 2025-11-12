@@ -25,22 +25,29 @@
     body { margin:0; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
     header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; background:#ffffffcc; backdrop-filter:saturate(180%) blur(8px); }
     header h1 { margin:0; font-size:18px; font-weight:600; }
-    main { display:grid; grid-template-columns: 660px 1fr; gap:16px; padding:16px; align-items:start; }
-    .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px; box-shadow:0 1px 2px rgba(0,0,0,0.04); }
-    #boards-wrap { display:flex; flex-direction:column; gap:12px; }
-    #boards { display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
-    canvas.board { display:block; width:100%; max-width:320px; aspect-ratio:1/1; background:#fff; border-radius:8px; border:1px solid var(--border); }
+    main { display:flex; flex-direction:column; gap:16px; padding:16px; align-items:center; }
+    .card { background:var(--panel); border:1px solid var(--border); border-radius:0; padding:12px; box-shadow:0 1px 2px rgba(0,0,0,0.04); }
+    #boards-wrap { display:flex; flex-direction:column; gap:12px; max-width:1700px; position:relative; }
+     #startOverlay { position:absolute; inset:0; background:rgba(255,255,255,0.9); display:flex; justify-content:center; align-items:center; flex-direction:column; gap:20px; }
+      #gameOverOverlay { position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; flex-direction:column; gap:20px; display:none; }
+      #gameOverText { color: white; }
+      #restartGame { background:#f6f8fa; color:var(--text); border:1px solid var(--border); border-radius:0; padding:8px 10px; cursor:pointer; transition:background .15s, box-shadow .15s; }
+      #restartGame:hover { background:#eef2f7; }
+    .spinner { border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display:inline-block; margin-right:4px; vertical-align:middle; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+     #boards { display:grid; grid-template-columns: repeat(4, 400px); gap:10px; }
+     canvas.board { display:block; width:400px; height:400px; background:#fff; border-radius:0; border:1px solid var(--border); }
     .controls { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
     .row { display:grid; grid-template-columns: 140px 1fr auto; gap:8px; align-items:center; }
     input[type=range] { width:100%; }
-    button { background:#f6f8fa; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 10px; cursor:pointer; transition:background .15s, box-shadow .15s; }
+    button { background:#f6f8fa; color:var(--text); border:1px solid var(--border); border-radius:0; padding:8px 10px; cursor:pointer; transition:background .15s, box-shadow .15s; }
     button:hover { background:#eef2f7; }
     button:active { background:#e2e8ef; }
     table { width:100%; border-collapse:collapse; font-size:14px; }
     th, td { padding:6px 8px; border-bottom:1px solid var(--border); text-align:right; }
     th { background:#f0f3f6; font-weight:600; }
     th:first-child, td:first-child { text-align:left; }
-    .pill { font-size:12px; background:rgba(9,105,218,0.08); color:var(--accent); border:1px solid rgba(9,105,218,0.3); padding:2px 6px; border-radius:999px; }
+    .pill { font-size:12px; background:rgba(9,105,218,0.08); color:var(--accent); border:1px solid rgba(9,105,218,0.3); padding:2px 6px; border-radius:0; }
     .legend { display:flex; gap:8px; align-items:center; margin-top:6px; color:var(--muted); font-size:12px; }
     .muted { color:var(--muted); }
     .row-inline { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -52,67 +59,60 @@
 </head>
 <body>
   <header>
-    <h1>AlphaZero Qubic 4×4×4 — MCTS Explainer</h1>
-    <span class="pill">ONNX in browser</span>
+    <h1>AlphaToe</h1>
   </header>
 
-  <main>
-    <section class="card" id="boards-wrap">
+   <main>
+     <section class="card" id="boards-wrap">
+       <div id="startOverlay">
+         <h2 style="text-align:center;">Who starts first?</h2>
+         <div style="display:flex; gap:20px; justify-content:center;">
+           <button id="humanStart" style="text-align:center;">I start</button>
+           <button id="aiStart" style="text-align:center;">AI starts</button>
+         </div>
+       </div>
       <div id="boards">
-        <canvas id="board0" class="board" width="320" height="320"></canvas>
-        <canvas id="board1" class="board" width="320" height="320"></canvas>
-        <canvas id="board2" class="board" width="320" height="320"></canvas>
-        <canvas id="board3" class="board" width="320" height="320"></canvas>
-      </div>
-      <div class="legend">
-        <div style="width:14px;height:14px;background:var(--accent);opacity:0.15;border:1px solid #30363d;"></div>
-        <span>Heat = visit probability π</span>
-      </div>
-      <div class="controls" style="margin-top:8px;">
-        <div class="row">
-          <label>Simulations</label>
-          <input id="sims" type="range" min="20" max="2000" value="400"/>
-          <span class="mono" id="simsVal">400</span>
+         <canvas id="board0" class="board" width="800" height="800"></canvas>
+         <canvas id="board1" class="board" width="800" height="800"></canvas>
+         <canvas id="board2" class="board" width="800" height="800"></canvas>
+         <canvas id="board3" class="board" width="800" height="800"></canvas>
+       </div>
+        <div id="gameOverOverlay">
+          <h2 id="gameOverText"></h2>
+          <button id="restartGame">Play Again</button>
         </div>
-        <div class="row">
-          <label>c_puct</label>
-          <input id="cpuct" type="range" min="0.2" max="3.0" step="0.05" value="1.25"/>
-          <span class="mono" id="cpuctVal">1.25</span>
-        </div>
-        <div class="row">
-          <label>Temperature τ</label>
-          <input id="temp" type="range" min="0" max="1" step="0.05" value="0.1"/>
-          <span class="mono" id="tempVal">0.10</span>
-        </div>
-        <div class="row">
-          <label>Dirichlet ε</label>
-          <input id="eps" type="range" min="0" max="0.8" step="0.05" value="0.25"/>
-          <span class="mono" id="epsVal">0.25</span>
-        </div>
-        <div class="row">
-          <label>Dirichlet α</label>
-          <input id="alpha" type="range" min="0.05" max="1.0" step="0.05" value="0.3"/>
-          <span class="mono" id="alphaVal">0.30</span>
-        </div>
-        <div class="row-inline">
-          <button id="run">Run MCTS</button>
-          <button id="aiMove">AI Move</button>
-          <button id="reset">Reset</button>
-        </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <h3 style="margin:6px 0 10px 0;">Root analysis</h3>
-      <div class="muted" style="margin:8px 0;">Top 16 actions by visit count</div>
-      <table>
-        <thead><tr><th>Cell (x,y,z)</th><th>Idx</th><th>N</th><th>Q(parent)</th><th>P</th><th>U</th><th>π</th></tr></thead>
-        <tbody id="statsBody"></tbody>
-      </table>
-      <div style="margin-top:10px;">
-        <span>Predicted value v(s): <span class="mono" id="predV">—</span></span>
-      </div>
-    </section>
+        <div class="controls" style="margin-top:8px;">
+         <div class="row-inline">
+           <button id="run">Ask AI to help you</button>
+           <button id="reset">Reset</button>
+           <button id="toggleAnalysis">More Info</button>
+         </div>
+       </div>
+       <div id="aiStatus" style="position:absolute; bottom:12px; right:12px; font-size:14px; background:var(--panel); border:1px solid var(--border); border-radius:0; padding:4px 8px; width:120px; height:30px; display:flex; align-items:center; justify-content:center;">Waiting</div>
+     </section>
+
+     <section class="card" style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+       <div style="flex:2;">
+         <h3 style="margin:6px 0 10px 0;">Root analysis</h3>
+         <div class="muted" style="margin:8px 0;">Top 16 actions by visit count</div>
+          <table>
+            <thead><tr><th>Cell (x,y,z)</th><th>N</th><th>Q(parent)</th><th>P</th><th>U</th><th>π</th></tr></thead>
+            <tbody id="statsBody"></tbody>
+          </table>
+          <div style="margin-top:10px;">
+            <span>Predicted value v(s): <span class="mono" id="predV">—</span></span>
+          </div>
+       </div>
+       <div style="flex:1;">
+         <h4 style="margin:6px 0 10px 0;">Parameters</h4>
+         <div style="display:flex; justify-content:space-between;"><span>Simulations:</span> <span class="mono" id="simsVal">1000</span></div>
+         <div style="display:flex; justify-content:space-between;"><span>c_puct:</span> <span class="mono" id="cpuctVal">1.00</span></div>
+         <div style="display:flex; justify-content:space-between;"><span>Temperature τ:</span> <span class="mono" id="tempVal">0.00</span></div>
+         <div style="display:flex; justify-content:space-between;"><span>Dirichlet ε:</span> <span class="mono" id="epsVal">0.00</span></div>
+         <div style="display:flex; justify-content:space-between;"><span>Dirichlet α:</span> <span class="mono" id="alphaVal">0.30</span></div>
+       </div>
+     </section>
   </main>
 
 <script>
@@ -171,15 +171,23 @@ class Game {
     this.player = -this.player;
     return true;
   }
-  score(){
-    const b=this.board;
-    for(const L of Game.WIN_LINES){
-      const s = b[L[0]] + b[L[1]] + b[L[2]] + b[L[3]];
-      if(s===4)  return 1;
-      if(s===-4) return -1;
-    }
-    return 0;
-  }
+   score(){
+     const b=this.board;
+     for(const L of Game.WIN_LINES){
+       const s = b[L[0]] + b[L[1]] + b[L[2]] + b[L[3]];
+       if(s===4)  return 1;
+       if(s===-4) return -1;
+     }
+     return 0;
+   }
+   getWinningLine(){
+     const b=this.board;
+     for(const L of Game.WIN_LINES){
+       const s = b[L[0]] + b[L[1]] + b[L[2]] + b[L[3]];
+       if(s===4 || s===-4) return L;
+     }
+     return null;
+   }
   over(){ return this.score()!==0 || this.validMoves().length===0; }
 }
 
@@ -395,13 +403,9 @@ class MCTS {
 /* ===== UI + Orchestration ===== */
 const canvases = [0,1,2,3].map(i => document.getElementById(`board${i}`));
 const ctxs = canvases.map(c => c.getContext("2d"));
-const SIZE = 320, CELL = SIZE/4;
+const SIZE = 800, CELL = SIZE/4;
 
-const simsInput = document.getElementById("sims");
-const cpuctInput = document.getElementById("cpuct");
-const tempInput = document.getElementById("temp");
-const epsInput = document.getElementById("eps");
-const alphaInput = document.getElementById("alpha");
+
 const simsVal = document.getElementById("simsVal");
 const cpuctVal = document.getElementById("cpuctVal");
 const tempVal = document.getElementById("tempVal");
@@ -409,18 +413,53 @@ const epsVal = document.getElementById("epsVal");
 const alphaVal = document.getElementById("alphaVal");
 const statsBody = document.getElementById("statsBody");
 const predV = document.getElementById("predV");
+const aiStatus = document.getElementById("aiStatus");
 
 let game = new Game();
 let model = new ONNXAlphaZero();
 let lastRoot = null;
 
-function drawAll(board, visitsPi=null){
-  for(let z=0; z<4; z++){
-    drawBoard(ctxs[z], board, z, visitsPi);
+let startPlayer = null;
+let resolveStart;
+function showStartChoice() {
+  return new Promise((resolve) => {
+    resolveStart = resolve;
+    document.getElementById("startOverlay").style.display = 'block';
+  });
+}
+document.getElementById("humanStart").addEventListener("click", () => {
+  if(startPlayer === null){
+    startPlayer = 1;
+    document.getElementById("startOverlay").style.display = 'none';
+    resolveStart();
   }
+});
+document.getElementById("aiStart").addEventListener("click", () => {
+  if(startPlayer === null){
+    startPlayer = -1;
+    document.getElementById("startOverlay").style.display = 'none';
+    resolveStart();
+  }
+});
+
+function drawAll(board, visitsPi=null, winning=null){
+   for(let z=0; z<4; z++){
+     drawBoard(ctxs[z], board, z, visitsPi, winning);
+   }
+ }
+
+function showGameOver(){
+  const score = game.score();
+  let text = "It's a draw!";
+  if(score === 1) text = "You win!";
+  else if(score === -1) text = "AI wins!";
+  document.getElementById("gameOverText").textContent = text;
+  document.getElementById("gameOverOverlay").style.display = 'flex';
+  const winning = game.getWinningLine();
+  drawAll(game.board, null, winning);
 }
 
-function drawBoard(ctx, board, z, visitsPi){
+function drawBoard(ctx, board, z, visitsPi, winning=null){
   // bg
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0,0,SIZE,SIZE);
@@ -440,26 +479,28 @@ function drawBoard(ctx, board, z, visitsPi){
         if(p>0){
           ctx.fillStyle = `rgba(9,105,218,${0.10 + 0.35*p})`;
           ctx.fillRect(x*CELL+3, y*CELL+3, CELL-6, CELL-6);
+       }
+
+     }
+   }
+ }
+   // pieces
+    ctx.lineWidth=10;
+   for(let y=0;y<4;y++){
+     for(let x=0;x<4;x++){
+       const idx = toIdx(x,y,z);
+       const val = board[idx];
+       const px = x*CELL, py = y*CELL;
+       const isWinning = winning && winning.includes(idx);
+       ctx.strokeStyle = isWinning ? "red" : "#1f2328";
+        if(val===1){ // X
+          ctx.beginPath(); ctx.moveTo(px+28,py+28); ctx.lineTo(px+CELL-28,py+CELL-28); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(px+CELL-28,py+28); ctx.lineTo(px+28,py+CELL-28); ctx.stroke();
+        } else if(val===-1){ // O
+          ctx.beginPath(); ctx.arc(px+CELL/2, py+CELL/2, CELL/2-36, 0, Math.PI*2); ctx.stroke();
         }
-      }
-    }
-  }
-  // pieces
-  ctx.strokeStyle="#1f2328"; 
-  ctx.lineWidth=5;
-  for(let y=0;y<4;y++){
-    for(let x=0;x<4;x++){
-      const idx = toIdx(x,y,z);
-      const val = board[idx];
-      const px = x*CELL, py = y*CELL;
-      if(val===1){ // X
-        ctx.beginPath(); ctx.moveTo(px+14,py+14); ctx.lineTo(px+CELL-14,py+CELL-14); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(px+CELL-14,py+14); ctx.lineTo(px+14,py+CELL-14); ctx.stroke();
-      } else if(val===-1){ // O
-        ctx.beginPath(); ctx.arc(px+CELL/2, py+CELL/2, CELL/2-18, 0, Math.PI*2); ctx.stroke();
-      }
-    }
-  }
+     }
+   }
 }
 
 function toPiFromVisits(root, tau){
@@ -487,12 +528,11 @@ function updateStats(root, tau){
   const parentN = 1 + root.N;
   const rows = [];
   for(const [a, child] of root.children.entries()){
-    const U = child.prior * (Math.sqrt(parentN) / (1 + child.N)) * parseFloat(cpuctInput.value);
+    const U = child.prior * (Math.sqrt(parentN) / (1 + child.N)) * 1.0;
     const [x,y,z] = toXYZ(a);
     const row = `
       <tr>
         <td>(${x},${y},${z})</td>
-        <td>${a}</td>
         <td>${child.N}</td>
         <td>${child.QFromParent().toFixed(3)}</td>
         <td>${child.prior.toFixed(3)}</td>
@@ -515,54 +555,95 @@ function avgRootQ(root){
   return den>0 ? num/den : 0;
 }
 
-// Click -> move
-canvases.forEach((cv, z)=>{
-  cv.addEventListener("click", async (e)=>{
-    const rect = cv.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / (rect.width / 4));
-    const y = Math.floor((e.clientY - rect.top) / (rect.height / 4));
-    if(x<0||x>3||y<0||y>3) return;
-    const idx = toIdx(x,y,z);
-    if(game.board[idx]!==0 || game.over()) return;
-    game.makeMove(idx);
-    drawAll(game.board, null);
-    lastRoot = null;
-  });
-});
+async function aiMove(){
+   aiStatus.innerHTML = '<div class="spinner"></div>Thinking...';
+   await runMCTSOnce();
+   aiStatus.textContent = 'Waiting';
+   const pi = toPiFromVisits(lastRoot, 0.0);
+   const legal = game.validMoves();
+   if(legal.length===0) return;
+   let best=legal[0], bestP=-1;
+   for(const a of legal){ if(pi[a] > bestP){ bestP=pi[a]; best=a; } }
+   game.makeMove(best);
+   lastRoot = null;
+   drawAll(game.board, null);
+   if(game.over()){
+     showGameOver();
+   }
+ }
 
-document.getElementById("reset").addEventListener("click", ()=>{
-  game = new Game();
-  lastRoot = null;
-  drawAll(game.board, null);
+// Click -> move
+ canvases.forEach((cv, z)=>{
+   cv.addEventListener("click", async (e)=>{
+     if(aiStatus.innerHTML.includes('Thinking') || game.player !== 1) return;
+     const rect = cv.getBoundingClientRect();
+     const x = Math.floor((e.clientX - rect.left) / (rect.width / 4));
+     const y = Math.floor((e.clientY - rect.top) / (rect.height / 4));
+     if(x<0||x>3||y<0||y>3) return;
+     const idx = toIdx(x,y,z);
+     if(game.board[idx]!==0 || game.over()) return;
+     game.makeMove(idx);
+     drawAll(game.board, null);
+     lastRoot = null;
+     if(game.over()){
+       showGameOver();
+     } else if(game.player === -1){
+       await aiMove();
+     }
+   });
+ });
+
+ document.getElementById("reset").addEventListener("click", async ()=>{
+    game = new Game();
+    lastRoot = null;
+    drawAll(game.board, null);
+    startPlayer = null;
+    document.getElementById("gameOverOverlay").style.display = 'none';
+    await showStartChoice();
+    game.player = startPlayer;
+    if(startPlayer === -1){
+      await aiMove();
+    }
+  });
+
+ document.getElementById("restartGame").addEventListener("click", async ()=>{
+    game = new Game();
+    lastRoot = null;
+    drawAll(game.board, null);
+    startPlayer = null;
+    document.getElementById("gameOverOverlay").style.display = 'none';
+    await showStartChoice();
+    game.player = startPlayer;
+    if(startPlayer === -1){
+      await aiMove();
+    }
+  });
+
+document.getElementById("toggleAnalysis").addEventListener("click", ()=>{
+  const analysis = document.querySelector("main > section:nth-child(2)");
+  const button = document.getElementById("toggleAnalysis");
+  const isHidden = analysis.style.display === 'none';
+  analysis.style.display = isHidden ? 'block' : 'none';
+  button.style.background = isHidden ? 'var(--accent)' : '';
 });
 
 document.getElementById("run").addEventListener("click", async ()=>{
+  if(aiStatus.innerHTML.includes('Thinking')) return;
+  aiStatus.innerHTML = '<div class="spinner"></div>Thinking...';
   await runMCTSOnce();
+  aiStatus.textContent = 'Waiting';
 });
 
-document.getElementById("aiMove").addEventListener("click", async ()=>{
-  await runMCTSOnce();
-  const pi = toPiFromVisits(lastRoot, parseFloat(tempInput.value));
-  const legal = game.validMoves();
-  if(legal.length===0) return;
-  let best=legal[0], bestP=-1;
-  for(const a of legal){ if(pi[a] > bestP){ bestP=pi[a]; best=a; } }
-  game.makeMove(best);
-  lastRoot = null;
-  drawAll(game.board, null);
-});
 
-for(const [elt, out] of [[simsInput,simsVal],[cpuctInput,cpuctVal],[tempInput,tempVal],[epsInput,epsVal],[alphaInput,alphaVal]]){
-  elt.addEventListener("input", ()=>{ out.textContent = parseFloat(elt.value).toFixed(elt===cpuctInput?2:0); });
-  out.textContent = parseFloat(elt.value).toFixed(elt===cpuctInput?2:0);
-}
+
+
 
 async function runMCTSOnce(){
-  const sims = parseInt(simsInput.value);
-  const cpuct = parseFloat(cpuctInput.value);
-  const eps = parseFloat(epsInput.value);
-  const alpha = parseFloat(alphaInput.value);
-  const tau = parseFloat(tempInput.value);
+  const sims = 1000;
+  const cpuct = 1.0;
+  const eps = 0.0;
+  const alpha = 0.3;
+  const tau = 0.0;
 
   const mcts = new MCTS(game.clone(), model, cpuct, alpha, eps);
   lastRoot = await mcts.search(sims);
@@ -571,12 +652,25 @@ async function runMCTSOnce(){
 
 (async function boot(){
   drawAll(game.board, null);
-  const ok = await model.load("model_4x4x4.onnx");
-  if(!ok){
-    alert("Cannot load/run the 4×4×4 ONNX in this browser. Try Chrome/Edge with WebGPU enabled (chrome://flags → WebGPU), or export a 2D-only model.");
-    return;
-  }
-  await runMCTSOnce();
+  simsVal.textContent = "1000";
+  cpuctVal.textContent = "1.00";
+  tempVal.textContent = "0.00";
+  epsVal.textContent = "0.00";
+  alphaVal.textContent = "0.30";
+  aiStatus.textContent = 'Waiting';
+   document.querySelector("main > section:nth-child(2)").style.display = 'none';
+   document.getElementById("gameOverOverlay").style.display = 'none';
+   const startPromise = showStartChoice();
+   await startPromise;
+   game.player = startPlayer;
+   const ok = await model.load("model_4x4x4.onnx");
+   if(!ok){
+     alert("Cannot load/run the 4×4×4 ONNX in this browser. Try Chrome/Edge with WebGPU enabled (chrome://flags → WebGPU), or export a 2D-only model.");
+     return;
+   }
+   if(startPlayer === -1){
+     await aiMove();
+   }
 })();
 </script>
 </body>
