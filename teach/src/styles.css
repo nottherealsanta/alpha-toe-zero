@@ -95,20 +95,38 @@ body {
   position: relative;
   z-index: 1;
   padding: 60px 80px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 100%;
 }
 
 #hero h1 {
   font-size: 6rem;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
   margin: 0;
   line-height: 1.1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent) 50%, var(--text) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  from {
+    filter: brightness(1.2) drop-shadow(0 0 0 rgba(9, 105, 218, 0));
+  }
+  to {
+    filter: brightness(1.4) drop-shadow(0 0 8px rgba(9, 105, 218, 0.15));
+  }
 }
 
 #hero .subtitle {
   font-size: 1.5rem;
   font-weight: 300;
-  color: var(--muted);
+  color: var(--text);
   margin-top: 16px;
   text-align: center;
 }
@@ -476,7 +494,6 @@ td:first-child {
 /* ===== Game Container Layout ===== */
 #game-container {
   display: flex;
-  gap: 16px;
   align-items: flex-start;
   width: 100%;
   justify-content: center;
