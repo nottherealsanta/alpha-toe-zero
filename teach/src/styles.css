@@ -642,3 +642,37 @@ td:first-child {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Cell Tooltip ===== */
+.cell-tooltip {
+  position: fixed;
+  background: white;
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  pointer-events: none;
+  z-index: 1000;
+  display: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+}
+
+.cell-tooltip.visible {
+  display: block;
+}
+
+/* ===== Cell Highlight ===== */
+.cell-highlight {
+  position: fixed;
+  border: 2px solid #0969da;
+  pointer-events: none;
+  z-index: 999;
+  display: none;
+  box-sizing: border-box;
+}
+
+.cell-highlight.visible {
+  display: block;
+}

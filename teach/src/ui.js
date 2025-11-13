@@ -111,6 +111,9 @@ export function updateStats(root, tau, game, ctxs, drawAllFn) {
   const pi = toPiFromVisits(root, tau);
   drawAllFn(ctxs, game.board, pi);
 
+  // Store root data for tooltips
+  setRootData(root);
+
   const parentN = 1 + root.N;
   const rows = [];
   for (const [a, child] of root.children.entries()) {
@@ -200,4 +203,92 @@ export function showStartChoice() {
     const overlay = document.getElementById("startOverlay");
     if (overlay) overlay.style.display = 'flex';
   });
+}
+
+// Global variable to store current root data for tooltips
+let currentRootData = null;
+
+/**
+ * Update root data for tooltips
+ */
+export function setRootData(root) {
+  currentRootData = root;
+}
+
+/**
+ * Show cell tooltip
+ */
+export function showCellTooltip(x, y, z, event, game, isUserRequestedHelp) {
+  const tooltip = document.getElementById('cell-tooltip');
+  const highlight = document.getElementById('cell-highlight');
+  if (!tooltip) return;
+
+  let content;
+  if (!currentRootData) {
+    content = `<div style="font-family: 'IBM Plex Mono', monospace;">(${x},${y},${z})<br><span style="font-style: italic;">Run AI analysis first</span></div>`;
+  } else {
+    const idx = toIdx(x, y, z);
+    const child = currentRootData.children.get(idx);
+    
+    if (!child) {
+      content = `<div style="font-family: 'IBM Plex Mono', monospace;">Cell (${x},${y},${z})<br><span style="font-style: italic;">No analysis data</span></div>`;
+    } else {
+      const parentN = 1 + currentRootData.N;
+      const U = child.prior * (Math.sqrt(parentN) / (1 + child.N)) * 1.0;
+      const pi = toPiFromVisits(currentRootData, 0.0); // tau=0 for deterministic policy
+      
+      // Determine context label
+      let label = "Previous AI turn";
+      if (isUserRequestedHelp && game && game.player === 1) {
+        label = "Your help";
+      }
+      
+      content = `<div style="font-family: 'IBM Plex Mono', monospace;"><strong style="font-size: 10px; color: #6e7781;">${label}</strong><br>Cell (${x},${y},${z})<br>
+<table style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; border-collapse: collapse; margin-top: 4px;">
+<tr><td style="padding: 2px 4px;">N</td><td style="padding: 2px 4px; text-align: right;">${child.N}</td></tr>
+<tr><td style="padding: 2px 4px;">Q</td><td style="padding: 2px 4px; text-align: right;">${child.QFromParent().toFixed(3)}</td></tr>
+<tr><td style="padding: 2px 4px;">P</td><td style="padding: 2px 4px; text-align: right;">${child.prior.toFixed(3)}</td></tr>
+<tr><td style="padding: 2px 4px;">U</td><td style="padding: 2px 4px; text-align: right;">${U.toFixed(3)}</td></tr>
+<tr><td style="padding: 2px 4px;">π</td><td style="padding: 2px 4px; text-align: right;">${(pi[idx] * 100).toFixed(1)}%</td></tr>
+</table></div>`;
+    }
+  }
+
+  tooltip.innerHTML = content;
+  tooltip.classList.add('visible');
+  
+  // Position tooltip and highlight to the right of the hovered cell
+  const canvas = event.target;
+  const rect = canvas.getBoundingClientRect();
+  const cellWidth = rect.width / 4;
+  const cellHeight = rect.height / 4;
+  const cellLeft = x * cellWidth;
+  const cellTop = y * cellHeight;
+  
+  // Tooltip to the right of the cell
+  tooltip.style.left = `${rect.left + cellLeft + cellWidth }px`;
+  tooltip.style.top = `${rect.top + cellTop}px`;
+  
+  // Show blue border highlight
+  if (highlight) {
+    highlight.style.left = `${rect.left + cellLeft}px`;
+    highlight.style.top = `${rect.top + cellTop}px`;
+    highlight.style.width = `${cellWidth}px`;
+    highlight.style.height = `${cellHeight}px`;
+    highlight.classList.add('visible');
+  }
+}
+
+/**
+ * Hide cell tooltip
+ */
+export function hideCellTooltip() {
+  const tooltip = document.getElementById('cell-tooltip');
+  const highlight = document.getElementById('cell-highlight');
+  if (tooltip) {
+    tooltip.classList.remove('visible');
+  }
+  if (highlight) {
+    highlight.classList.remove('visible');
+  }
 }

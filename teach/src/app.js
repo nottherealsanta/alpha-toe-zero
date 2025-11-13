@@ -10,7 +10,9 @@ import {
   showGameOver,
   startThinkingAnimation,
   stopThinkingAnimation,
-  showStartChoice
+  showStartChoice,
+  showCellTooltip,
+  hideCellTooltip
 } from './ui.js';
 
 // Game state
@@ -18,6 +20,7 @@ let game = new Game();
 let model = new ONNXAlphaZero();
 let lastRoot = null;
 let startPlayer = null;
+let isUserRequestedHelp = false;
 
 // Canvas setup
 const canvases = [0, 1, 2, 3].map(i => document.getElementById(`board${i}`));
@@ -26,7 +29,7 @@ const ctxs = canvases.map(c => c.getContext("2d"));
 /**
  * Run MCTS once
  */
-async function runMCTSOnce() {
+async function runMCTSOnce(userRequested = false) {
   const sims = 1000;
   const cpuct = 1.0;
   const eps = 0.0;
@@ -35,6 +38,7 @@ async function runMCTSOnce() {
 
   const mcts = new MCTS(game.clone(), model, cpuct, alpha, eps);
   lastRoot = await mcts.search(sims);
+  isUserRequestedHelp = userRequested;
   updateStats(lastRoot, tau, game, ctxs, drawAll);
 }
 
@@ -98,12 +102,29 @@ function setupEventHandlers() {
       game.makeMove(idx);
       drawAll(ctxs, game.board, null);
       lastRoot = null;
+      isUserRequestedHelp = false;
       
       if (game.over()) {
         showGameOver(game, ctxs, drawAll);
       } else if (game.player === -1) {
         await aiMove();
       }
+    });
+
+    // Hover for tooltips
+    cv.addEventListener("mousemove", (e) => {
+      const rect = cv.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / (rect.width / 4));
+      const y = Math.floor((e.clientY - rect.top) / (rect.height / 4));
+      if (x < 0 || x > 3 || y < 0 || y > 3) {
+        hideCellTooltip();
+        return;
+      }
+      showCellTooltip(x, y, z, e, game, isUserRequestedHelp);
+    });
+
+    cv.addEventListener("mouseout", () => {
+      hideCellTooltip();
     });
   });
 
@@ -147,26 +168,6 @@ function setupEventHandlers() {
     });
   }
 
-  // Toggle analysis button
-  const toggleBtn = document.getElementById("toggleAnalysis");
-  if (toggleBtn) {
-    toggleBtn.addEventListener("click", () => {
-      const analysis = document.getElementById("analysis-panel");
-      if (analysis) {
-        const isVisible = analysis.classList.contains('visible');
-        if (isVisible) {
-          analysis.classList.remove('visible');
-          toggleBtn.style.background = '';
-          toggleBtn.style.color = '';
-        } else {
-          analysis.classList.add('visible');
-          toggleBtn.style.background = 'var(--accent)';
-          toggleBtn.style.color = 'white';
-        }
-      }
-    });
-  }
-
   // Run MCTS button (Ask AI to help)
   const runBtn = document.getElementById("run");
   if (runBtn) {
@@ -174,7 +175,7 @@ function setupEventHandlers() {
       const aiStatusText = document.getElementById('aiStatusText');
       if (aiStatusText && aiStatusText.innerHTML.includes('Thinking')) return;
       startThinkingAnimation();
-      await runMCTSOnce();
+      await runMCTSOnce(true);
       stopThinkingAnimation();
     });
   }
