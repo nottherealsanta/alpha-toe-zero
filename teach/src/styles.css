@@ -413,47 +413,47 @@ td:first-child {
 }
 
 /* ===== qubic game board ===== */
-#intro-section {
+#qubic-game-board {
   background: var(--panel);
   padding: 60px 20px;
 }
 
-#intro-section h2 {
+#qubic-game-board h2 {
   font-size: 3rem;
   font-weight: 700;
   margin: 0 0 20px 0;
   color: var(--text);
 }
 
-#intro-section h3 {
+#qubic-game-board h3 {
   font-size: 2rem;
   font-weight: 600;
   margin: 0 0 12px 0;
   color: var(--accent);
 }
 
-#intro-section .tagline {
+#qubic-game-board .tagline {
   font-size: 1.3rem;
   font-weight: 500;
   color: var(--muted);
   margin: 0 0 32px 0;
 }
 
-#intro-section .explanation {
+#qubic-game-board .explanation {
   text-align: left;
   padding: 24px 0;
   margin: 32px 0;
   max-width: 800px;
 }
 
-#intro-section .explanation p {
+#qubic-game-board .explanation p {
   font-size: 1.1rem;
   line-height: 1.7;
   color: var(--text);
   margin: 0;
 }
 
-#intro-section .card {
+#qubic-game-board .card {
   margin-top: 40px;
 }
 
@@ -493,11 +493,11 @@ td:first-child {
 }
 
 /* ===== Components ===== */
-#components-section {
+#components {
   background: var(--bg);
 }
 
-#components-section h2 {
+#components h2 {
   font-size: 3rem;
   font-weight: 700;
   margin: 0 0 60px 0;
