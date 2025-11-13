@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>AlphaZero Qubic 4×4×4 — MCTS Explainer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+  <script>
+    // Configure WASM - disable threading to avoid JSEP issues
+    ort.env.wasm.numThreads = 1;
+    ort.env.wasm.simd = true;
+    // Disable WebGPU to avoid JSEP compatibility issues
+    ort.env.webgpu = { disabled: false };
+  </script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #f6f8fa;
+      --text: #24292f;
+      --muted: #6e7781;
+      --accent: #0969da;
+      --border: #d0d7de;
+      --grid: #d8dee4;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #ffffffcc;
+      backdrop-filter: saturate(180%) blur(8px);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+      align-items: center;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    #boards-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 1700px;
+      position: relative;
+    }
+
+    #startOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #gameOverOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+      display: none;
+    }
+
+    #gameOverText {
+      color: white;
+    }
+
+    #restartGame {
+      background: #f6f8fa;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: background .15s, box-shadow .15s;
+    }
+
+    #restartGame:hover {
+      background: #eef2f7;
+    }
+
+    .spinner {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    #boards {
+      display: grid;
+      grid-template-columns: repeat(4, 400px);
+      gap: 10px;
+    }
+
+    canvas.board {
+      display: block;
+      width: 400px;
+      height: 400px;
+      background: #fff;
+      border-radius: 0;
+      border: 1px solid var(--border);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 140px 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input[type=range] {
+      width: 100%;
+    }
+
+    button {
+      background: #f6f8fa;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: background .15s, box-shadow .15s;
+    }
+
+    button:hover {
+      background: #eef2f7;
+    }
+
+    button:active {
+      background: #e2e8ef;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+    }
+
+    th {
+      background: #f0f3f6;
+      font-weight: 600;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
+
+    .pill {
+      font-size: 12px;
+      background: rgba(9, 105, 218, 0.08);
+      color: var(--accent);
+      border: 1px solid rgba(9, 105, 218, 0.3);
+      padding: 2px 6px;
+      border-radius: 0;
+    }
+
+    .legend {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .row-inline {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>AlphaToe</h1>
+  </header>
+
+  <main>
+    <section class="card" id="boards-wrap">
+      <div id="startOverlay">
+        <h2 style="text-align:center; height:2em; line-height:2em; margin:0;">Who starts first?</h2>
+        <div style="display:flex; gap:20px; justify-content:center;">
+          <button id="humanStart" style="text-align:center;">I start</button>
+          <button id="aiStart" style="text-align:center;">AI starts</button>
+        </div>
+      </div>
+      <div id="boards">
+        <canvas id="board0" class="board" width="800" height="800"></canvas>
+        <canvas id="board1" class="board" width="800" height="800"></canvas>
+        <canvas id="board2" class="board" width="800" height="800"></canvas>
+        <canvas id="board3" class="board" width="800" height="800"></canvas>
+      </div>
+      <div id="gameOverOverlay">
+        <h2 id="gameOverText"></h2>
+        <button id="restartGame">Play Again</button>
+      </div>
+
+      <div class="controls" style="margin-top:8px;">
+        <div class="row-inline">
+          <button id="run">Ask AI to help you</button>
+          <button id="reset">Reset</button>
+          <button id="toggleAnalysis">More Info</button>
+        </div>
+      </div>
+      <div id="aiStatus"
+        style="position:absolute; bottom:12px; right:12px; font-size:14px; background:#d1ecf1; color:var(--text);  border-radius:0; display:flex; align-items:center; gap:8px; min-width:140px; height: 36px;">
+
+        <span id="aiLabel"
+          style="background-color:#0969da; color:white; font-weight:bold; display:inline-block; text-align:center; width:40px; height:36px; line-height:36px;">AI</span>
+        <span id="aiStatusText" style="flex:1; text-align:left; display:flex; align-items:center; font-weight: 500;">Waiting</span>
+      </div>
+
+      <div style="flex:1; width: 200px;">
+          <div style="margin:6px 0 10px 0; font-weight: 700; font-size: 14px; color: #6e7781;">Parameters</div>
+          <div style="display:flex; justify-content:space-between;"><span style="color: var(--muted); font-size: 12px;"># simulations:</span> <span class="mono"
+              style="color: var(--muted); font-size: 12px;" id="simsVal">1000</span></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color: var(--muted); font-size: 12px;">c_puct:</span> <span class="mono"
+              style="color: var(--muted); font-size: 12px;" id="cpuctVal">1.00</span></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color: var(--muted); font-size: 12px;">Temperature τ:</span> <span class="mono"
+              style="color: var(--muted); font-size: 12px;" id="tempVal">0.00</span></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color: var(--muted); font-size: 12px;">Dirichlet ε:</span> <span class="mono"
+              style="color: var(--muted); font-size: 12px;" id="epsVal">0.00</span></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color: var(--muted); font-size: 12px;">Dirichlet α:</span> <span class="mono"
+              style="color: var(--muted); font-size: 12px;" id="alphaVal">0.30</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3 style="margin:6px 0 10px 0;">Root analysis</h3>
+      <div class="muted" style="margin:8px 0;">Top 16 actions by visit count</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Cell (x,y,z)</th>
+            <th>N</th>
+            <th>Q(parent)</th>
+            <th>P</th>
+            <th>U</th>
+            <th>π</th>
+          </tr>
+        </thead>
+        <tbody id="statsBody"></tbody>
+      </table>
+      <div style="margin-top:10px;">
+        <span>Predicted value v(s): <span class="mono" id="predV">—</span></span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /* ===== Utilities ===== */
+    const softmax = (arr) => {
+      const max = Math.max(...arr);
+      const exps = arr.map(v => Math.exp(v - max));
+      const s = exps.reduce((a, b) => a + b, 0);
+      return exps.map(v => v / s);
+    };
+    const normalize = (xs) => {
+      const s = xs.reduce((a, b) => a + b, 0);
+      return s > 0 ? xs.map(v => v / s) : xs.map(_ => 0);
+    };
+    const toIdx = (x, y, z) => z * 16 + y * 4 + x;
+    const toXYZ = (idx) => [idx % 4, Math.floor(idx / 4) % 4, Math.floor(idx / 16) % 4];
+
+    /* ===== Game 4×4×4 ===== */
+    class Game {
+      constructor(board = null, player = 1) {
+        this.board = board ? Int8Array.from(board) : new Int8Array(64).fill(0);
+        this.player = player; // 1 or -1
+        if (!Game.WIN_LINES) Game.WIN_LINES = Game.computeWinLines();
+      }
+      static computeWinLines() {
+        const lines = [];
+        // axis lines
+        for (let z = 0; z < 4; z++) for (let y = 0; y < 4; y++) lines.push([0, 1, 2, 3].map(x => toIdx(x, y, z)));
+        for (let z = 0; z < 4; z++) for (let x = 0; x < 4; x++) lines.push([0, 1, 2, 3].map(y => toIdx(x, y, z)));
+        for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) lines.push([0, 1, 2, 3].map(z => toIdx(x, y, z)));
+        // plane diagonals
+        for (let z = 0; z < 4; z++) {
+          lines.push([0, 1, 2, 3].map(i => toIdx(i, i, z)));
+          lines.push([0, 1, 2, 3].map(i => toIdx(i, 3 - i, z)));
+        }
+        for (let y = 0; y < 4; y++) {
+          lines.push([0, 1, 2, 3].map(i => toIdx(i, y, i)));
+          lines.push([0, 1, 2, 3].map(i => toIdx(i, y, 3 - i)));
+        }
+        for (let x = 0; x < 4; x++) {
+          lines.push([0, 1, 2, 3].map(i => toIdx(x, i, i)));
+          lines.push([0, 1, 2, 3].map(i => toIdx(x, i, 3 - i)));
+        }
+        // space diagonals (4)
+        lines.push([0, 1, 2, 3].map(i => toIdx(i, i, i)));
+        lines.push([0, 1, 2, 3].map(i => toIdx(i, i, 3 - i)));
+        lines.push([0, 1, 2, 3].map(i => toIdx(i, 3 - i, i)));
+        lines.push([0, 1, 2, 3].map(i => toIdx(3 - i, i, i)));
+        return lines;
+      }
+      clone() { return new Game(this.board, this.player); }
+      validMoves() { const a = []; for (let i = 0; i < 64; i++) if (this.board[i] === 0) a.push(i); return a; }
+      makeMove(a) {
+        if (this.board[a] !== 0) return false;
+        this.board[a] = this.player;
+        this.player = -this.player;
+        return true;
+      }
+      score() {
+        const b = this.board;
+        for (const L of Game.WIN_LINES) {
+          const s = b[L[0]] + b[L[1]] + b[L[2]] + b[L[3]];
+          if (s === 4) return 1;
+          if (s === -4) return -1;
+        }
+        return 0;
+      }
+      getWinningLine() {
+        const b = this.board;
+        for (const L of Game.WIN_LINES) {
+          const s = b[L[0]] + b[L[1]] + b[L[2]] + b[L[3]];
+          if (s === 4 || s === -4) return L;
+        }
+        return null;
+      }
+      over() { return this.score() !== 0 || this.validMoves().length === 0; }
+    }
+
+    /* ===== ONNX Model wrapper (input [1,2,4,4,4]) ===== */
+    class ONNXAlphaZero {
+      constructor() {
+        this.session = null;
+        this.inferenceQueue = Promise.resolve();
+      }
+
+      async load(url = "model_4x4x4.onnx") {
+        // Try WebGPU first, fall back to WASM on error
+        try {
+          // First attempt: WebGPU
+          if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
+            try {
+              this.session = await ort.InferenceSession.create(url, {
+                executionProviders: ['webgpu']
+              });
+              console.log('Using WebGPU backend');
+              return true;
+            } catch (webgpuError) {
+              console.warn('WebGPU failed, falling back to WASM:', webgpuError);
+            }
+          }
+
+          // Fallback: WASM only
+          this.session = await ort.InferenceSession.create(url, {
+            executionProviders: ['wasm']
+          });
+          console.log('Using WASM backend');
+          return true;
+        } catch (e) {
+          console.error("ONNX load failed:", e);
+          this.session = null;
+          return false;
+        }
+      }
+      encode(game) {
+        // planes C=2, Z=4, Y=4, X=4 (channel-first)
+        const cur = game.player;
+        const arr = new Float32Array(1 * 2 * 4 * 4 * 4);
+        for (let z = 0; z < 4; z++) {
+          for (let y = 0; y < 4; y++) {
+            for (let x = 0; x < 4; x++) {
+              const idx = toIdx(x, y, z);
+              const v = game.board[idx];
+              const off0 = 0 * 64 + z * 16 + y * 4 + x;
+              const off1 = 1 * 64 + z * 16 + y * 4 + x;
+              arr[off0] = (v === cur) ? 1.0 : 0.0;
+              arr[off1] = (v === -cur) ? 1.0 : 0.0;
+            }
+          }
+        }
+        return arr;
+      }
+      async predict(game) {
+        if (!this.session) throw new Error("ONNX session not initialized");
+
+        // Queue inference to prevent concurrent session access
+        return new Promise((resolve, reject) => {
+          this.inferenceQueue = this.inferenceQueue.then(async () => {
+            try {
+              const input = this.encode(game);
+              const feeds = { "input": new ort.Tensor('float32', input, [1, 2, 4, 4, 4]) };
+              const out = await this.session.run(feeds);
+              const v = out["value"].data[0];
+              const logits = Array.from(out["policy_logits"].data);
+              resolve({ v, logits });
+            } catch (error) {
+              reject(error);
+            }
+          }).catch(reject);
+        });
+      }
+    }
+
+
+    /* ===== MCTS ===== */
+    class Node {
+      constructor(state, parent = null, action = null, prior = 0) {
+        this.state = state; // {board:Int8Array, player:int}
+        this.parent = parent;
+        this.action = action;
+        this.prior = prior;
+        this.children = new Map(); // action -> Node
+        this.N = 0;
+        this.W = 0; // sum of values from this node's perspective
+      }
+      get Q() { return this.N ? this.W / this.N : 0; }
+      QFromParent() { return -this.Q; }
+    }
+
+    class MCTS {
+      constructor(game, model, c_puct = 1.25, alpha = 0.3, eps = 0.25) {
+        this.game = game;
+        this.model = model;
+        this.c_puct = c_puct;
+        this.alpha = alpha;
+        this.eps = eps;
+      }
+
+      async search(simulations = 400) {
+        const root = new Node({ board: this.game.board.slice(), player: this.game.player });
+        await this.expandWithNoise(root);
+
+        for (let s = 0; s < simulations; s++) {
+          let node = root;
+          const g = new Game(root.state.board, root.state.player);
+
+          while (node.children.size > 0 && !g.over()) {
+            node = this.select(node);
+            g.makeMove(node.action);
+          }
+
+          if (!g.over()) {
+            const v = await this.expand(node, g);
+            this.backup(node, v);
+          } else {
+            const terminalV = g.score() * g.player;
+            this.backup(node, terminalV);
+          }
+        }
+        return root;
+      }
+
+      select(node) {
+        const parentVisits = 1 + node.N;
+        let best = null, bestScore = -Infinity;
+        for (const child of node.children.values()) {
+          const U = this.c_puct * child.prior * (Math.sqrt(parentVisits) / (1 + child.N));
+          const score = child.QFromParent() + U;
+          if (score > bestScore) { bestScore = score; best = child; }
+        }
+        return best;
+      }
+
+      async expand(node, game) {
+        const { v, logits } = await this.model.predict(game);
+        const legal = game.validMoves();
+        const masked = legal.map(a => logits[a]);
+        const probsL = softmax(masked);
+        for (let i = 0; i < legal.length; i++) {
+          const a = legal[i];
+          if (!node.children.has(a)) {
+            const childState = { board: game.board.slice(), player: game.player };
+            const child = new Node(childState, node, a, probsL[i]);
+            node.children.set(a, child);
+          }
+        }
+        return v;
+      }
+
+      async expandWithNoise(root) {
+        const g = new Game(root.state.board, root.state.player);
+        if (g.over()) return;
+        const { logits } = await this.model.predict(g);
+        const legal = g.validMoves();
+        if (legal.length === 0) return;
+        const priors = softmax(legal.map(a => logits[a]));
+        const noise = this.dirichlet(this.alpha, legal.length);
+        const mixed = priors.map((p, i) => (1 - this.eps) * p + this.eps * noise[i]);
+        for (let i = 0; i < legal.length; i++) {
+          const a = legal[i];
+          const childState = { board: g.board.slice(), player: g.player };
+          const child = new Node(childState, root, a, mixed[i]);
+          root.children.set(a, child);
+        }
+      }
+
+      backup(node, vLeaf) {
+        let cur = node;
+        let v = vLeaf;
+        while (cur) {
+          cur.N += 1;
+          cur.W += v;
+          v = -v;
+          cur = cur.parent;
+        }
+      }
+
+      dirichlet(alpha, k) {
+        const samples = new Array(k).fill(0).map(() => this.gamma(alpha, 1));
+        const sum = samples.reduce((a, b) => a + b, 0);
+        return samples.map(x => x / sum);
+      }
+      gamma(shape, scale) {
+        if (shape < 1) {
+          const u = Math.random();
+          return this.gamma(1 + shape, scale) * Math.pow(u, 1 / shape);
+        }
+        const d = shape - 1 / 3;
+        const c = 1 / Math.sqrt(9 * d);
+        while (true) {
+          let x, v;
+          do {
+            x = this.normal();
+            v = 1 + c * x;
+          } while (v <= 0);
+          v = v * v * v;
+          const u = Math.random();
+          if (u < 1 - 0.0331 * (x * x) * (x * x)) return scale * d * v;
+          if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return scale * d * v;
+        }
+      }
+      normal() {
+        const u = 1 - Math.random();
+        const v = 1 - Math.random();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      }
+    }
+
+    /* ===== UI + Orchestration ===== */
+    const canvases = [0, 1, 2, 3].map(i => document.getElementById(`board${i}`));
+    const ctxs = canvases.map(c => c.getContext("2d"));
+    const SIZE = 800, CELL = SIZE / 4;
+
+
+    const simsVal = document.getElementById("simsVal");
+    const cpuctVal = document.getElementById("cpuctVal");
+    const tempVal = document.getElementById("tempVal");
+    const epsVal = document.getElementById("epsVal");
+    const alphaVal = document.getElementById("alphaVal");
+    const statsBody = document.getElementById("statsBody");
+    const predV = document.getElementById("predV");
+    const aiStatus = document.getElementById("aiStatus");
+    const aiLabel = document.getElementById('aiLabel');
+
+    let game = new Game();
+    let model = new ONNXAlphaZero();
+    let lastRoot = null;
+
+    let startPlayer = null;
+    let resolveStart;
+    let dotsInterval;
+    function startThinkingAnimation() {
+      let dots = '';
+      dotsInterval = setInterval(() => {
+        dots = dots.length < 3 ? dots + '.' : '';
+        document.getElementById('aiStatusText').innerHTML = 'Thinking' + dots;
+      }, 200);
+    }
+    function stopThinkingAnimation() {
+      clearInterval(dotsInterval);
+      document.getElementById('aiStatusText').innerHTML = 'Waiting';
+    }
+    function showStartChoice() {
+      return new Promise((resolve) => {
+        resolveStart = resolve;
+        document.getElementById("startOverlay").style.display = 'flex';
+      });
+    }
+    document.getElementById("humanStart").addEventListener("click", () => {
+      if (startPlayer === null) {
+        startPlayer = 1;
+        document.getElementById("startOverlay").style.display = 'none';
+        resolveStart();
+      }
+    });
+    document.getElementById("aiStart").addEventListener("click", () => {
+      if (startPlayer === null) {
+        startPlayer = -1;
+        document.getElementById("startOverlay").style.display = 'none';
+        resolveStart();
+      }
+    });
+
+    function drawAll(board, visitsPi = null, winning = null) {
+      for (let z = 0; z < 4; z++) {
+        drawBoard(ctxs[z], board, z, visitsPi, winning);
+      }
+    }
+
+    function showGameOver() {
+      const score = game.score();
+      let text = "It's a draw!";
+      if (score === 1) text = "You win!";
+      else if (score === -1) text = "AI wins!";
+      document.getElementById("gameOverText").textContent = text;
+      document.getElementById("gameOverOverlay").style.display = 'flex';
+      const winning = game.getWinningLine();
+      drawAll(game.board, null, winning);
+    }
+
+    function drawBoard(ctx, board, z, visitsPi, winning = null) {
+      // bg
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, SIZE, SIZE);
+      // grid
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim() || '#d8dee4';
+      ctx.lineWidth = 2;
+      for (let i = 1; i < 4; i++) {
+        ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, SIZE); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(SIZE, i * CELL); ctx.stroke();
+      }
+      // heat
+      if (visitsPi) {
+        for (let y = 0; y < 4; y++) {
+          for (let x = 0; x < 4; x++) {
+            const idx = toIdx(x, y, z);
+            const p = visitsPi[idx] || 0;
+            if (p > 0) {
+              ctx.fillStyle = `rgba(9,105,218,${0.10 + 0.35 * p})`;
+              ctx.fillRect(x * CELL + 3, y * CELL + 3, CELL - 6, CELL - 6);
+            }
+
+          }
+        }
+      }
+      // pieces
+      ctx.lineWidth = 10;
+      for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 4; x++) {
+          const idx = toIdx(x, y, z);
+          const val = board[idx];
+          const px = x * CELL, py = y * CELL;
+          const isWinning = winning && winning.includes(idx);
+          ctx.strokeStyle = isWinning ? "red" : "#1f2328";
+          if (val === 1) { // X
+            ctx.beginPath(); ctx.moveTo(px + 28, py + 28); ctx.lineTo(px + CELL - 28, py + CELL - 28); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px + CELL - 28, py + 28); ctx.lineTo(px + 28, py + CELL - 28); ctx.stroke();
+          } else if (val === -1) { // O
+            ctx.beginPath(); ctx.arc(px + CELL / 2, py + CELL / 2, CELL / 2 - 36, 0, Math.PI * 2); ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function toPiFromVisits(root, tau) {
+      const counts = new Array(64).fill(0);
+      let sumN = 0;
+      for (const [a, child] of root.children.entries()) {
+        counts[a] = child.N;
+        sumN += child.N;
+      }
+      if (sumN === 0) return normalize(counts);
+      if (tau === 0) {
+        const idx = counts.indexOf(Math.max(...counts));
+        const pi = new Array(64).fill(0); pi[idx] = 1; return pi;
+      } else {
+        const pow = counts.map(n => Math.pow(n, 1.0 / Math.max(tau, 1e-6)));
+        const s = pow.reduce((a, b) => a + b, 0);
+        return s > 0 ? pow.map(v => v / s) : normalize(counts);
+      }
+    }
+
+    function updateStats(root, tau) {
+      const pi = toPiFromVisits(root, tau);
+      drawAll(game.board, pi);
+
+      const parentN = 1 + root.N;
+      const rows = [];
+      for (const [a, child] of root.children.entries()) {
+        const U = child.prior * (Math.sqrt(parentN) / (1 + child.N)) * 1.0;
+        const [x, y, z] = toXYZ(a);
+        const row = `
+      <tr>
+        <td>(${x},${y},${z})</td>
+        <td>${child.N}</td>
+        <td>${child.QFromParent().toFixed(3)}</td>
+        <td>${child.prior.toFixed(3)}</td>
+        <td>${U.toFixed(3)}</td>
+        <td>${(pi[a] * 100).toFixed(1)}%</td>
+      </tr>`;
+        rows.push([child.N, row]);
+      }
+      rows.sort((x, y) => y[0] - x[0]);
+      statsBody.innerHTML = rows.slice(0, 16).map(x => x[1]).join("");
+      predV.textContent = root.children.size ? avgRootQ(root).toFixed(3) : "—";
+    }
+
+    function avgRootQ(root) {
+      let num = 0, den = 0;
+      for (const child of root.children.values()) {
+        num += child.N * child.QFromParent();
+        den += child.N;
+      }
+      return den > 0 ? num / den : 0;
+    }
+
+    async function aiMove() {
+      startThinkingAnimation();
+      await runMCTSOnce();
+      stopThinkingAnimation();
+      const pi = toPiFromVisits(lastRoot, 0.0);
+      const legal = game.validMoves();
+      if (legal.length === 0) return;
+      let best = legal[0], bestP = -1;
+      for (const a of legal) { if (pi[a] > bestP) { bestP = pi[a]; best = a; } }
+      game.makeMove(best);
+      lastRoot = null;
+      drawAll(game.board, null);
+      if (game.over()) {
+        showGameOver();
+      }
+    }
+
+    // Click -> move
+    canvases.forEach((cv, z) => {
+      cv.addEventListener("click", async (e) => {
+        if (document.getElementById('aiStatusText').innerHTML.includes('Thinking') || game.player !== 1) return;
+        const rect = cv.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / (rect.width / 4));
+        const y = Math.floor((e.clientY - rect.top) / (rect.height / 4));
+        if (x < 0 || x > 3 || y < 0 || y > 3) return;
+        const idx = toIdx(x, y, z);
+        if (game.board[idx] !== 0 || game.over()) return;
+        game.makeMove(idx);
+        drawAll(game.board, null);
+        lastRoot = null;
+        if (game.over()) {
+          showGameOver();
+        } else if (game.player === -1) {
+          await aiMove();
+        }
+      });
+    });
+
+    document.getElementById("reset").addEventListener("click", async () => {
+      game = new Game();
+      lastRoot = null;
+      drawAll(game.board, null);
+      startPlayer = null;
+      document.getElementById("gameOverOverlay").style.display = 'none';
+      await showStartChoice();
+      game.player = startPlayer;
+      if (startPlayer === -1) {
+        await aiMove();
+      }
+    });
+
+    document.getElementById("restartGame").addEventListener("click", async () => {
+      game = new Game();
+      lastRoot = null;
+      drawAll(game.board, null);
+      startPlayer = null;
+      document.getElementById("gameOverOverlay").style.display = 'none';
+      await showStartChoice();
+      game.player = startPlayer;
+      if (startPlayer === -1) {
+        await aiMove();
+      }
+    });
+
+    document.getElementById("toggleAnalysis").addEventListener("click", () => {
+      const analysis = document.querySelector("main > section:nth-child(2)");
+      const button = document.getElementById("toggleAnalysis");
+      const isHidden = analysis.style.display === 'none';
+      analysis.style.display = isHidden ? 'block' : 'none';
+      button.style.background = isHidden ? 'var(--accent)' : '';
+    });
+
+    document.getElementById("run").addEventListener("click", async () => {
+      if (document.getElementById('aiStatusText').innerHTML.includes('Thinking')) return;
+      startThinkingAnimation();
+      await runMCTSOnce();
+      stopThinkingAnimation();
+    });
+
+
+
+
+
+    async function runMCTSOnce() {
+      const sims = 1000;
+      const cpuct = 1.0;
+      const eps = 0.0;
+      const alpha = 0.3;
+      const tau = 0.0;
+
+      const mcts = new MCTS(game.clone(), model, cpuct, alpha, eps);
+      lastRoot = await mcts.search(sims);
+      updateStats(lastRoot, tau);
+    }
+
+    (async function boot() {
+      drawAll(game.board, null);
+      if (simsVal) simsVal.textContent = "1000";
+      if (cpuctVal) cpuctVal.textContent = "1.00";
+      if (tempVal) tempVal.textContent = "0.00";
+      if (epsVal) epsVal.textContent = "0.00";
+      if (alphaVal) alphaVal.textContent = "0.00";
+      const aiStatusText = document.getElementById('aiStatusText');
+      if (aiStatusText) aiStatusText.innerHTML = 'Waiting';
+      if (aiLabel) aiLabel.innerHTML = 'AI';
+      const analysis = document.querySelector("main > section:nth-child(2)");
+      if (analysis) analysis.style.display = 'none';
+      const gameOverOverlay = document.getElementById("gameOverOverlay");
+      if (gameOverOverlay) gameOverOverlay.style.display = 'none';
+      const ok = await model.load("model_4x4x4.onnx");
+      if (!ok) {
+        alert("Cannot load/run the 4×4×4 ONNX in this browser. Try Chrome/Edge with WebGPU enabled (chrome://flags → WebGPU), or export a 2D-only model.");
+        return;
+      }
+      const startPromise = showStartChoice();
+      await startPromise;
+      game.player = startPlayer;
+      if (startPlayer === -1) {
+        await aiMove();
+      }
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,556 @@
+/* ===== CSS Variables ===== */
+:root {
+  --bg: #FFFFFF;
+  --panel: #FBFBFB;
+  --text: #1D1D20;
+  --muted: #6e7781;
+  --accent: #0969da;
+  --border: #d0d7de;
+  --grid: #d8dee4;
+}
+
+/* ===== Global Styles ===== */
+* {
+  box-sizing: border-box;
+  font-family: 'Helvetica Neue', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 0;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Hero Section ===== */
+#hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 40px;
+  border: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+  position: relative;
+}
+
+#hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 50px);
+  grid-template-rows: repeat(auto-fill, 50px);
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.tile {
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(128, 128, 128, 0.1);
+  background: transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+.tile::before {
+  content: attr(data-symbol);
+  opacity: 0;
+  border: none;
+  transition: opacity 1s ease-in-out;
+}
+
+.tile.x::before,
+.tile.o::before {
+  opacity: 0.4;
+}
+
+#hero h1 {
+  font-size: 6rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0;
+  line-height: 1.1;
+  position: relative;
+  z-index: 1;
+}
+
+#hero .subtitle {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 16px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== Main Layout ===== */
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 60px 16px;
+  align-items: center;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* ===== Board Section ===== */
+#boards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1700px;
+  position: relative;
+}
+
+#startOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#startOverlay button {
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  padding: 12px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+
+#startOverlay button:hover {
+  background: #0756cc;
+  box-shadow: 0 2px 4px rgba(9, 105, 218, 0.3);
+}
+
+#startOverlay button:active {
+  background: #0645a3;
+}
+
+#gameOverOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  display: none;
+}
+
+#gameOverText {
+  color: white;
+}
+
+#restartGame {
+  background: #f6f8fa;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+
+#restartGame:hover {
+  background: #eef2f7;
+}
+
+/* ===== Loading Spinner ===== */
+.spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Game Boards ===== */
+#boards {
+  display: grid;
+  grid-template-columns: repeat(4, 400px);
+  gap: 10px;
+}
+
+canvas.board {
+  display: block;
+  width: 400px;
+  height: 400px;
+  background: #fff;
+  border-radius: 0;
+  border: 1px solid var(--border);
+}
+
+/* ===== Controls ===== */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.controls button {
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  padding: 12px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background .15s, box-shadow .15s;
+}
+
+.controls button:hover {
+  background: #0756cc;
+  box-shadow: 0 2px 4px rgba(9, 105, 218, 0.3);
+}
+
+.controls button:active {
+  background: #0645a3;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.row-inline {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+input[type=range] {
+  width: 100%;
+}
+
+button {
+  background: #f6f8fa;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+
+button:hover {
+  background: #eef2f7;
+}
+
+button:active {
+  background: #e2e8ef;
+}
+
+/* ===== AI Status Badge ===== */
+#aiStatus {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 14px;
+  background: #d1ecf1;
+  color: var(--text);
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  height: 36px;
+}
+
+#aiLabel {
+  background-color: #0969da;
+  color: white;
+  font-weight: bold;
+  display: inline-block;
+  text-align: center;
+  width: 40px;
+  height: 36px;
+  line-height: 36px;
+}
+
+#aiStatusText {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+/* ===== Parameters Section ===== */
+.parameters-section {
+  flex: 1;
+  width: 200px;
+}
+
+.parameters-title {
+  margin: 6px 0 10px 0;
+  font-weight: 700;
+  font-size: 14px;
+  color: #6e7781;
+}
+
+.parameter-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.parameter-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.parameter-value {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ===== Analysis Table ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+th {
+  background: #f0f3f6;
+  font-weight: 600;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+/* ===== Snap Sections ===== */
+.snap-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 40px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.section-content {
+  max-width: 800px;
+  text-align: center;
+}
+
+.section-content-wide {
+  max-width: 1750px;
+  text-align: center;
+  width: 100%;
+}
+
+/* ===== Intro Section ===== */
+#intro-section {
+  background: var(--panel);
+  padding: 60px 20px;
+}
+
+#intro-section h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: var(--text);
+}
+
+#intro-section h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: var(--accent);
+}
+
+#intro-section .tagline {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0 0 32px 0;
+}
+
+#intro-section .explanation {
+  text-align: center;
+  padding: 24px 0;
+  margin: 32px auto;
+  max-width: 800px;
+}
+
+#intro-section .explanation p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 0;
+}
+
+#intro-section .card {
+  margin-top: 40px;
+}
+
+/* ===== Game Container Layout ===== */
+#game-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+  justify-content: center;
+}
+
+#analysis-panel {
+  display: none;
+  min-width: 400px;
+  max-width: 500px;
+  align-self: stretch;
+}
+
+#analysis-panel.visible {
+  display: block;
+}
+
+/* ===== Components Section ===== */
+#components-section {
+  background: var(--bg);
+}
+
+#components-section h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 60px 0;
+  color: var(--text);
+}
+
+.info-cards {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 1000px;
+}
+
+.info-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+  flex: 1;
+  min-width: 280px;
+  max-width: 320px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.info-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: var(--accent);
+}
+
+.info-card p {
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* ===== Utility Classes ===== */
+.pill {
+  font-size: 12px;
+  background: rgba(9, 105, 218, 0.08);
+  color: var(--accent);
+  border: 1px solid rgba(9, 105, 218, 0.3);
+  padding: 2px 6px;
+  border-radius: 0;
+}
+
+.legend {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 1100px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
