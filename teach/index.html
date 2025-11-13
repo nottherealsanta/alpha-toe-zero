@@ -21,9 +21,13 @@
   
   <!-- Styles -->
   <link rel="stylesheet" href="./src/styles.css" />
+
+  <!-- 3D Animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 
 <body>
+   <!-- hero -->
    <section id="hero">
      <div id="hero-bg"></div>
      <div class="hero-content">
@@ -32,17 +36,22 @@
      </div>
    </section>
 
+   <!-- qubic game board -->
    <section id="intro-section" class="snap-section">
      <div class="section-content-wide">
-       <h2>See what it can do</h2>
-       <h3>3D Tic-Tac-Toe, aka Qubic</h3>
-       <p class="tagline">See if you can win</p>
-       <div class="explanation">
-         <p>Unlike traditional 2D Tic-Tac-Toe played on a 3×3 grid, Qubic is played on a 4×4×4 cube. 
-         You can win by getting four in a row horizontally, vertically, or diagonally — not just on a single layer, 
-         but across all three dimensions. This creates 76 possible winning lines instead of just 8, making it 
-         a much more complex and strategic game.</p>
-       </div>
+      <div class="intro-container">
+        <div class="intro-text">
+          <h2>See what it can do</h2>
+          <h3>3D Tic-Tac-Toe, aka Qubic</h3>
+          <div class="explanation">
+            <p>Unlike traditional 2D Tic-Tac-Toe played on a 3×3 grid, Qubic is played on a 4×4×4 cube. 
+            You can win by getting four in a row horizontally, vertically, or diagonally — not just on a single layer, 
+            but across all three dimensions. This creates 76 possible winning lines instead of just 8, making it 
+            a much more complex and strategic game.</p>
+          </div>
+        </div>
+        <div id="qubic-animation"></div>
+      </div>
 
        <div id="game-container">
          <section class="card" id="boards-wrap">
@@ -128,6 +137,7 @@
   <!-- Load application modules -->
      </section>
 
+     <!-- Components -->
      <section id="components-section" class="snap-section">
        <div class="section-content">
          <h2>3 Components of AlphaZero</h2>
@@ -152,7 +162,10 @@
   <!-- Load application modules -->
   <script type="module">
     import { init } from './src/app.js';
+    import { initQubicAnimation } from './src/qubic-animation.js';
+    
     init();
+    initQubicAnimation();
   </script>
 </body>
 

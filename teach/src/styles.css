@@ -27,7 +27,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== Hero Section ===== */
+/* ===== hero ===== */
 #hero {
   height: 100vh;
   display: flex;
@@ -97,16 +97,16 @@ body {
 }
 
 #hero h1 {
-  font-size: 8rem;
-  font-weight: 800;
+  font-size: 6rem;
+  font-weight: 600;
   text-align: center;
   margin: 0;
   line-height: 1.1;
 }
 
 #hero .subtitle {
-  font-size: 2rem;
-  font-weight: 400;
+  font-size: 1.5rem;
+  font-weight: 300;
   color: var(--muted);
   margin-top: 16px;
   text-align: center;
@@ -309,7 +309,7 @@ button:active {
   bottom: 12px;
   right: 12px;
   font-size: 14px;
-  background: #d1ecf1;
+  background: transparent;
   color: var(--text);
   border-radius: 0;
   display: flex;
@@ -409,11 +409,10 @@ td:first-child {
 
 .section-content-wide {
   max-width: 1750px;
-  text-align: center;
   width: 100%;
 }
 
-/* ===== Intro Section ===== */
+/* ===== qubic game board ===== */
 #intro-section {
   background: var(--panel);
   padding: 60px 20px;
@@ -441,9 +440,9 @@ td:first-child {
 }
 
 #intro-section .explanation {
-  text-align: center;
+  text-align: left;
   padding: 24px 0;
-  margin: 32px auto;
+  margin: 32px 0;
   max-width: 800px;
 }
 
@@ -456,6 +455,21 @@ td:first-child {
 
 #intro-section .card {
   margin-top: 40px;
+}
+
+.intro-container {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+.intro-text {
+  flex: 1.5;
+  text-align: left;
+}
+#qubic-animation {
+  width: 400px;
+  height: 400px;
+  position: relative;
 }
 
 /* ===== Game Container Layout ===== */
@@ -478,7 +492,7 @@ td:first-child {
   display: block;
 }
 
-/* ===== Components Section ===== */
+/* ===== Components ===== */
 #components-section {
   background: var(--bg);
 }
@@ -554,6 +568,54 @@ td:first-child {
 
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ===== Qubic Animation Styles ===== */
+#qubic-animation {
+  cursor: grab;
+}
+
+#qubic-animation.grabbing {
+  cursor: grabbing;
+}
+
+#qubic-animation-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.qubic-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.qubic-controls button {
+  padding: 8px;
+  background: #000;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  pointer-events: auto;
+  line-height: 1;
+}
+
+.qubic-controls button:hover {
+  background: #333;
+  transform: scale(1.02);
+}
+
+.qubic-controls button:active {
+  transform: scale(0.98);
 }
 
 /* ===== Responsive Design ===== */

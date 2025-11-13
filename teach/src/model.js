@@ -17,10 +17,9 @@ export class ONNXAlphaZero {
           this.session = await ort.InferenceSession.create(url, {
             executionProviders: ['webgpu']
           });
-          console.log('Using WebGPU backend');
           return true;
         } catch (webgpuError) {
-          console.warn('WebGPU failed, falling back to WASM:', webgpuError);
+          // WebGPU failed, fall back to WASM
         }
       }
 
@@ -28,10 +27,8 @@ export class ONNXAlphaZero {
       this.session = await ort.InferenceSession.create(url, {
         executionProviders: ['wasm']
       });
-      console.log('Using WASM backend');
       return true;
     } catch (e) {
-      console.error("ONNX load failed:", e);
       this.session = null;
       return false;
     }
