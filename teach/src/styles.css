@@ -34,7 +34,7 @@
     --accent-shadow: rgba(74, 158, 255, 0.15);
     --border: #404040;
     --grid: #404040;
-    --hero-bg-overlay: rgba(0, 0, 0, 0.5);
+    --hero-bg-overlay: rgba(0, 0, 0, 0.05);
     --start-overlay-bg: rgba(0, 0, 0, 0.9);
     --game-over-bg: rgba(255, 255, 255, 0.1);
     --spinner-bg: #404040;
@@ -143,9 +143,8 @@ body {
     flex-direction: column;
     background: var(--hero-bg-overlay);
     border-radius: 50%;
-    backdrop-filter: blur(10px);
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.15), 0 0 60px rgba(0, 0, 0, 0.2);
-    mask-image: radial-gradient(circle, black 0%, transparent 55%, transparent 100%);
+    backdrop-filter: blur(3px);
+    mask-image: radial-gradient(circle, black 0%, black 20%,transparent 50%, transparent 100%);
 }
 
 #hero h1 {

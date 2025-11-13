@@ -271,7 +271,7 @@ export function initQubicAnimation() {
             
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
             const material = new THREE.LineBasicMaterial({
-                color: 0x000000,
+                color: 0x0969da,
                 linewidth: 5,
                 transparent: true,
                 opacity: 0
