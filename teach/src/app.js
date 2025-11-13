@@ -210,7 +210,7 @@ function setupEventHandlers() {
  */
 function startHeroAnimation() {
   const tiles = document.querySelectorAll('.tile');
-  const targetFillPercentage = 0.40; // 40% of tiles should be filled
+  const targetFillPercentage = 0.35; // 35% of tiles should be filled
   const targetCount = Math.floor(tiles.length * targetFillPercentage);
 
   const animate = () => {
@@ -232,7 +232,7 @@ function startHeroAnimation() {
       randomFilledTile.removeAttribute('data-symbol');
     }
 
-    setTimeout(animate, 300); // Animate every 300ms
+    setTimeout(animate, 400); // Animate every 400ms
   };
 
   animate();
@@ -275,9 +275,9 @@ export async function init() {
    const heroBg = document.getElementById('hero-bg');
    if (heroBg) {
      const fragment = document.createDocumentFragment();
-     // Calculate how many tiles we need to fill the viewport
-     const tilesX = Math.ceil(window.innerWidth / 30);
-     const tilesY = Math.ceil(window.innerHeight / 30);
+     // Calculate how many tiles we need to fill the viewport (using 40px tiles)
+     const tilesX = Math.ceil(window.innerWidth / 40);
+     const tilesY = Math.ceil(window.innerHeight / 40);
      const totalTiles = tilesX * tilesY;
      
      for (let i = 0; i < totalTiles; i++) {
