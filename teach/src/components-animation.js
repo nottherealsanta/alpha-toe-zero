@@ -226,8 +226,8 @@ function startMCTSTraversal(svg) {
     if (!svg) return;
     svg.removeAttribute('width'); svg.removeAttribute('height');
     
-    // Pause all animations initially
-    svg.querySelectorAll('.move, .arrow, .loop-arrow').forEach(el => {
+    // Pause all animations initially (include moving agent)
+    svg.querySelectorAll('.move, .arrow, .loop-arrow, .agent').forEach(el => {
       el.style.animationPlayState = 'paused';
     });
     
@@ -237,10 +237,25 @@ function startMCTSTraversal(svg) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          // Resume all animations
-          svg.querySelectorAll('.move, .arrow, .loop-arrow').forEach(el => {
+          // Reset all animations to start from beginning
+          svg.querySelectorAll('.move, .arrow, .loop-arrow, .agent').forEach(el => {
+            el.style.animation = 'none';
+            el.offsetHeight; // Trigger reflow
+            el.style.animation = null;
+          });
+          
+          // Resume all animations (include moving agent)
+          svg.querySelectorAll('.move, .arrow, .loop-arrow, .agent').forEach(el => {
             el.style.animationPlayState = 'running';
           });
+          
+          // Stop animations after 2 complete cycles (30 seconds = 2 × 15s cycle)
+          setTimeout(() => {
+            svg.querySelectorAll('.move, .arrow, .loop-arrow, .agent').forEach(el => {
+              el.style.animationPlayState = 'paused';
+            });
+          }, 30000);
+          
           observer.unobserve(svg);
         }
       });

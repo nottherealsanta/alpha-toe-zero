@@ -53,7 +53,7 @@
 /* ===== Global Styles ===== */
 * {
   box-sizing: border-box;
-  font-family: 'Helvetica Neue', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-family: 'SF Pro Display', 'IBM Plex Sans', 'Helvetica Neue', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial;
 }
 
 html {
@@ -214,6 +214,7 @@ main {
   align-items: center;
   flex-direction: column;
   gap: 20px;
+  z-index: 10;
 }
 
 #startOverlay button {
@@ -473,6 +474,7 @@ td:first-child {
   text-align: center;
 }
 
+
 .section-content-wide {
   max-width: 1750px;
   width: 100%;
@@ -564,7 +566,7 @@ td:first-child {
 
 #components h2 {
   font-size: 3rem;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0 0 20px 0;
   color: var(--text);
 }
@@ -583,11 +585,11 @@ td:first-child {
   height: 900px;
   flex: 1;
   min-width: 500px;
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
 }
 
 .card-image {
-  height: 40%;
+  height: 60%;
   background: var(--bg);
   display: flex;
   align-items: center;
@@ -599,13 +601,14 @@ td:first-child {
 .card-content {
   flex: 1;
   padding: 32px;
+  border-top: 1px solid var(--border);
   background: var(--panel);
 }
 
 .info-card h3 {
   font-size: 2rem;
-  font-weight: 600;
-  margin: 32px 0 64px 0;
+  font-weight: 500;
+  margin: 0px 0 32px 0;
   color: var(--text);
 }
 

@@ -49,12 +49,12 @@
     .arrow{fill:none;stroke:var(--self-play-svg);stroke-width:1.8;opacity:0;stroke-dasharray:80;stroke-dashoffset:80;marker-end:url(#arrowhead);}
     @keyframes drawArrow{to{stroke-dashoffset:0;opacity:0.7}}
     @keyframes fadeArrow{to{opacity:0}}
-    .a1{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:0.3s,1.2s;}
-    .a2{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:3.4s,4.3s;}
-    .a3{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:5.8s,6.7s;}
-    .a4{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:8.8s,9.7s;}
-    .a5{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:11.8s,12.7s;}
-    .a6{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:14.8s,15.7s;}
+    .a1{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:0.0s,0.6s;}
+    .a2{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:2.4s,3.0s;}
+    .a3{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:4.8s,5.4s;}
+    .a4{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:7.2s,7.8s;}
+    .a5{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:9.6s,10.2s;}
+    .a6{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:12.0s,12.6s;}
   </style>
   
   <defs>
