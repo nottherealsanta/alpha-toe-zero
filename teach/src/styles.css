@@ -35,7 +35,7 @@
     --border: #404040;
     --grid: #404040;
     --hero-bg-overlay: rgba(0, 0, 0, 0.05);
-    --start-overlay-bg: rgba(0, 0, 0, 0.9);
+    --start-overlay-bg: #1a1a1aee;
     --game-over-bg: rgba(255, 255, 255, 0.1);
     --spinner-bg: #404040;
     --spinner-accent: #4a9eff;

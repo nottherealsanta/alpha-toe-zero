@@ -19,7 +19,7 @@ export function drawAll(ctxs, board, visitsPi = null, winning = null) {
  */
 export function drawBoard(ctx, board, z, visitsPi, winning = null) {
   // Background
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#fff';
   ctx.fillRect(0, 0, SIZE, SIZE);
   
   // Grid lines
@@ -59,7 +59,8 @@ export function drawBoard(ctx, board, z, visitsPi, winning = null) {
       const px = x * CELL;
       const py = y * CELL;
       const isWinning = winning && winning.includes(idx);
-      ctx.strokeStyle = isWinning ? "red" : "#1f2328";
+      const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1f2328';
+      ctx.strokeStyle = isWinning ? "red" : textColor;
       
       if (val === 1) {
         // Draw X
