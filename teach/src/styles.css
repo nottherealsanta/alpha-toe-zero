@@ -583,11 +583,11 @@ td:first-child {
   height: 900px;
   flex: 1;
   min-width: 500px;
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
 }
 
 .card-image {
-  height: 50%;
+  height: 40%;
   background: var(--bg);
   display: flex;
   align-items: center;
@@ -605,7 +605,7 @@ td:first-child {
 .info-card h3 {
   font-size: 2rem;
   font-weight: 600;
-  margin: 0 0 16px 0;
+  margin: 32px 0 64px 0;
   color: var(--text);
 }
 

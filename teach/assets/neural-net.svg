@@ -42,60 +42,60 @@
   <g transform="translate(24,36)">
     <!-- connections left->mid (drawn after left nodes appear) -->
     <g class="conn conn-left-mid">
-      <path class="conn c c1 fast" d="M16 20 Q 70 20 124 20" style="animation-delay:0.85s"/>
-      <path class="conn c c2 fast" d="M16 20 Q 70 30 124 52" style="animation-delay:0.88s"/>
-      <path class="conn c c3 fast" d="M16 20 Q 70 45 124 84" style="animation-delay:0.91s"/>
-      <path class="conn c c4 fast" d="M16 20 Q 70 60 124 116" style="animation-delay:0.94s"/>
-      <path class="conn c c5 fast" d="M16 20 Q 70 75 124 148" style="animation-delay:0.97s"/>
-      <path class="conn c c6 fast" d="M16 52 Q 70 38 124 20" style="animation-delay:1.00s"/>
-      <path class="conn c c7 fast" d="M16 52 Q 70 52 124 52" style="animation-delay:1.03s"/>
-      <path class="conn c c8 fast" d="M16 52 Q 70 65 124 84" style="animation-delay:1.06s"/>
-      <path class="conn c c9 fast" d="M16 52 Q 70 80 124 116" style="animation-delay:1.09s"/>
-      <path class="conn c c10 fast" d="M16 52 Q 70 95 124 148" style="animation-delay:1.12s"/>
-      <path class="conn c c11 fast" d="M16 84 Q 70 55 124 20" style="animation-delay:1.15s"/>
-      <path class="conn c c12 fast" d="M16 84 Q 70 68 124 52" style="animation-delay:1.18s"/>
-      <path class="conn c c13 fast" d="M16 84 Q 70 84 124 84" style="animation-delay:1.21s"/>
-      <path class="conn c c14 fast" d="M16 84 Q 70 98 124 116" style="animation-delay:1.24s"/>
-      <path class="conn c c15 fast" d="M16 84 Q 70 112 124 148" style="animation-delay:1.27s"/>
-      <path class="conn c c16 fast" d="M16 116 Q 70 72 124 20" style="animation-delay:1.30s"/>
-      <path class="conn c c17 fast" d="M16 116 Q 70 85 124 52" style="animation-delay:1.33s"/>
-      <path class="conn c c18 fast" d="M16 116 Q 70 98 124 84" style="animation-delay:1.36s"/>
-      <path class="conn c c19 fast" d="M16 116 Q 70 116 124 116" style="animation-delay:1.39s"/>
-      <path class="conn c c20 fast" d="M16 116 Q 70 130 124 148" style="animation-delay:1.42s"/>
-      <path class="conn c c21 fast" d="M16 148 Q 70 88 124 20" style="animation-delay:1.45s"/>
-      <path class="conn c c22 fast" d="M16 148 Q 70 102 124 52" style="animation-delay:1.48s"/>
-      <path class="conn c c23 fast" d="M16 148 Q 70 114 124 84" style="animation-delay:1.51s"/>
-      <path class="conn c c24 fast" d="M16 148 Q 70 130 124 116" style="animation-delay:1.54s"/>
-      <path class="conn c c25 fast" d="M16 148 Q 70 148 124 148" style="animation-delay:1.57s"/>
+      <path class="conn c c1 fast" d="M16 20 Q 58 20 124 20" style="animation-delay:0.85s"/>
+      <path class="conn c c2 fast" d="M16 20 Q 82 30 124 52" style="animation-delay:0.88s"/>
+      <path class="conn c c3 fast" d="M16 20 Q 62 45 124 84" style="animation-delay:0.91s"/>
+      <path class="conn c c4 fast" d="M16 20 Q 78 60 124 116" style="animation-delay:0.94s"/>
+      <path class="conn c c5 fast" d="M16 20 Q 54 75 124 148" style="animation-delay:0.97s"/>
+      <path class="conn c c6 fast" d="M16 52 Q 72 38 124 20" style="animation-delay:1.00s"/>
+      <path class="conn c c7 fast" d="M16 52 Q 66 52 124 52" style="animation-delay:1.03s"/>
+      <path class="conn c c8 fast" d="M16 52 Q 76 65 124 84" style="animation-delay:1.06s"/>
+      <path class="conn c c9 fast" d="M16 52 Q 60 80 124 116" style="animation-delay:1.09s"/>
+      <path class="conn c c10 fast" d="M16 52 Q 80 95 124 148" style="animation-delay:1.12s"/>
+      <path class="conn c c11 fast" d="M16 84 Q 56 55 124 20" style="animation-delay:1.15s"/>
+      <path class="conn c c12 fast" d="M16 84 Q 84 68 124 52" style="animation-delay:1.18s"/>
+      <path class="conn c c13 fast" d="M16 84 Q 68 84 124 84" style="animation-delay:1.21s"/>
+      <path class="conn c c14 fast" d="M16 84 Q 74 98 124 116" style="animation-delay:1.24s"/>
+      <path class="conn c c15 fast" d="M16 84 Q 52 112 124 148" style="animation-delay:1.27s"/>
+      <path class="conn c c16 fast" d="M16 116 Q 88 72 124 20" style="animation-delay:1.30s"/>
+      <path class="conn c c17 fast" d="M16 116 Q 64 85 124 52" style="animation-delay:1.33s"/>
+      <path class="conn c c18 fast" d="M16 116 Q 76 98 124 84" style="animation-delay:1.36s"/>
+      <path class="conn c c19 fast" d="M16 116 Q 58 116 124 116" style="animation-delay:1.39s"/>
+      <path class="conn c c20 fast" d="M16 116 Q 86 130 124 148" style="animation-delay:1.42s"/>
+      <path class="conn c c21 fast" d="M16 148 Q 60 88 124 20" style="animation-delay:1.45s"/>
+      <path class="conn c c22 fast" d="M16 148 Q 82 102 124 52" style="animation-delay:1.48s"/>
+      <path class="conn c c23 fast" d="M16 148 Q 62 114 124 84" style="animation-delay:1.51s"/>
+      <path class="conn c c24 fast" d="M16 148 Q 78 130 124 116" style="animation-delay:1.54s"/>
+      <path class="conn c c25 fast" d="M16 148 Q 54 148 124 148" style="animation-delay:1.57s"/>
     </g>
 
     <!-- connections mid->right (drawn after middle nodes appear) -->
     <g class="conn conn-mid-right slow">
-      <path class="conn m m1 slow" d="M124 20 Q 180 20 232 20" style="animation-delay:2.75s"/>
-      <path class="conn m m2 slow" d="M124 20 Q 180 30 232 52" style="animation-delay:2.78s"/>
-      <path class="conn m m3 slow" d="M124 20 Q 180 45 232 84" style="animation-delay:2.81s"/>
-      <path class="conn m m4 slow" d="M124 20 Q 180 60 232 116" style="animation-delay:2.84s"/>
-      <path class="conn m m5 slow" d="M124 20 Q 180 75 232 148" style="animation-delay:2.87s"/>
-      <path class="conn m m6 slow" d="M124 52 Q 180 38 232 20" style="animation-delay:2.90s"/>
-      <path class="conn m m7 slow" d="M124 52 Q 180 52 232 52" style="animation-delay:2.93s"/>
-      <path class="conn m m8 slow" d="M124 52 Q 180 65 232 84" style="animation-delay:2.96s"/>
-      <path class="conn m m9 slow" d="M124 52 Q 180 80 232 116" style="animation-delay:2.99s"/>
-      <path class="conn m m10 slow" d="M124 52 Q 180 95 232 148" style="animation-delay:3.02s"/>
-      <path class="conn m m11 slow" d="M124 84 Q 180 55 232 20" style="animation-delay:3.05s"/>
-      <path class="conn m m12 slow" d="M124 84 Q 180 68 232 52" style="animation-delay:3.08s"/>
-      <path class="conn m m13 slow" d="M124 84 Q 180 84 232 84" style="animation-delay:3.11s"/>
-      <path class="conn m m14 slow" d="M124 84 Q 180 98 232 116" style="animation-delay:3.14s"/>
-      <path class="conn m m15 slow" d="M124 84 Q 180 112 232 148" style="animation-delay:3.17s"/>
-      <path class="conn m m16 slow" d="M124 116 Q 180 72 232 20" style="animation-delay:3.20s"/>
-      <path class="conn m m17 slow" d="M124 116 Q 180 85 232 52" style="animation-delay:3.23s"/>
-      <path class="conn m m18 slow" d="M124 116 Q 180 98 232 84" style="animation-delay:3.26s"/>
-      <path class="conn m m19 slow" d="M124 116 Q 180 116 232 116" style="animation-delay:3.29s"/>
-      <path class="conn m m20 slow" d="M124 116 Q 180 130 232 148" style="animation-delay:3.32s"/>
-      <path class="conn m m21 slow" d="M124 148 Q 180 88 232 20" style="animation-delay:3.35s"/>
-      <path class="conn m m22 slow" d="M124 148 Q 180 102 232 52" style="animation-delay:3.38s"/>
-      <path class="conn m m23 slow" d="M124 148 Q 180 114 232 84" style="animation-delay:3.41s"/>
-      <path class="conn m m24 slow" d="M124 148 Q 180 130 232 116" style="animation-delay:3.44s"/>
-      <path class="conn m m25 slow" d="M124 148 Q 180 148 232 148" style="animation-delay:3.47s"/>
+      <path class="conn m m1 slow" d="M124 20 Q 170 20 232 20" style="animation-delay:2.75s"/>
+      <path class="conn m m2 slow" d="M124 20 Q 190 30 232 52" style="animation-delay:2.78s"/>
+      <path class="conn m m3 slow" d="M124 20 Q 166 45 232 84" style="animation-delay:2.81s"/>
+      <path class="conn m m4 slow" d="M124 20 Q 194 60 232 116" style="animation-delay:2.84s"/>
+      <path class="conn m m5 slow" d="M124 20 Q 172 75 232 148" style="animation-delay:2.87s"/>
+      <path class="conn m m6 slow" d="M124 52 Q 188 38 232 20" style="animation-delay:2.90s"/>
+      <path class="conn m m7 slow" d="M124 52 Q 164 52 232 52" style="animation-delay:2.93s"/>
+      <path class="conn m m8 slow" d="M124 52 Q 196 65 232 84" style="animation-delay:2.96s"/>
+      <path class="conn m m9 slow" d="M124 52 Q 168 80 232 116" style="animation-delay:2.99s"/>
+      <path class="conn m m10 slow" d="M124 52 Q 192 95 232 148" style="animation-delay:3.02s"/>
+      <path class="conn m m11 slow" d="M124 84 Q 162 55 232 20" style="animation-delay:3.05s"/>
+      <path class="conn m m12 slow" d="M124 84 Q 198 68 232 52" style="animation-delay:3.08s"/>
+      <path class="conn m m13 slow" d="M124 84 Q 174 84 232 84" style="animation-delay:3.11s"/>
+      <path class="conn m m14 slow" d="M124 84 Q 186 98 232 116" style="animation-delay:3.14s"/>
+      <path class="conn m m15 slow" d="M124 84 Q 160 112 232 148" style="animation-delay:3.17s"/>
+      <path class="conn m m16 slow" d="M124 116 Q 200 72 232 20" style="animation-delay:3.20s"/>
+      <path class="conn m m17 slow" d="M124 116 Q 176 85 232 52" style="animation-delay:3.23s"/>
+      <path class="conn m m18 slow" d="M124 116 Q 184 98 232 84" style="animation-delay:3.26s"/>
+      <path class="conn m m19 slow" d="M124 116 Q 158 116 232 116" style="animation-delay:3.29s"/>
+      <path class="conn m m20 slow" d="M124 116 Q 202 130 232 148" style="animation-delay:3.32s"/>
+      <path class="conn m m21 slow" d="M124 148 Q 176 88 232 20" style="animation-delay:3.35s"/>
+      <path class="conn m m22 slow" d="M124 148 Q 184 102 232 52" style="animation-delay:3.38s"/>
+      <path class="conn m m23 slow" d="M124 148 Q 158 114 232 84" style="animation-delay:3.41s"/>
+      <path class="conn m m24 slow" d="M124 148 Q 200 130 232 116" style="animation-delay:3.44s"/>
+      <path class="conn m m25 slow" d="M124 148 Q 170 148 232 148" style="animation-delay:3.47s"/>
     </g>
     <!-- nodes (rendered on top) -->
     <!-- left layer -->

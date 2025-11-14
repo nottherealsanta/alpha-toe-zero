@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="100%" height="320" role="img" aria-hidden="true">
+  <style>
+    :root{
+      --accent-svg: var(--accent, #0969da);
+      --muted-svg: var(--text, #1D1D20);
+      --self-play-svg: var(--accent, #0969da);
+    }
+    
+    /* AI agent (circle) moves between positions */
+    .agent{fill:#fff;stroke:var(--muted-svg);stroke-width:2;opacity:0.8;}
+    @keyframes moveAgent{
+      0%{cx:40px}
+      8%{cx:40px}
+      16%{cx:220px}
+      24%{cx:220px}
+      32%{cx:40px}
+      40%{cx:40px}
+      48%{cx:220px}
+      56%{cx:220px}
+      64%{cx:40px}
+      72%{cx:40px}
+      80%{cx:220px}
+      88%{cx:220px}
+      96%{cx:40px}
+      100%{cx:40px}
+    }
+    .agent{animation:moveAgent 15s ease-in-out infinite;}
+    
+    /* Game board in center */
+    .board{fill:none;stroke:var(--muted-svg);stroke-width:1.2;opacity:0.7;}
+    .board-cell{fill:none;stroke:var(--muted-svg);stroke-width:0.8;opacity:0.5;}
+    
+    /* Moves - appear alternately */
+    .move{transform-box:fill-box;transform-origin:center;opacity:0;}
+    @keyframes appear{from{opacity:0;transform:scale(0.3)}to{opacity:1;transform:scale(1)}}
+    .move-x{stroke:var(--self-play-svg);stroke-width:2.4;stroke-linecap:round;fill:none;}
+    .move-o{fill:none;stroke:var(--muted-svg);stroke-width:2.4;}
+    
+    /* Staggered move appearances */
+    .m1{animation:appear 400ms ease-out forwards;animation-delay:0.5s;}
+    .m2{animation:appear 400ms ease-out forwards;animation-delay:3.6s;}
+    .m3{animation:appear 400ms ease-out forwards;animation-delay:6.0s;}
+    .m4{animation:appear 400ms ease-out forwards;animation-delay:9.0s;}
+    .m5{animation:appear 400ms ease-out forwards;animation-delay:12.0s;}
+    .m6{animation:appear 400ms ease-out forwards;animation-delay:15.0s;}
+    
+    /* Arrows showing turn flow */
+    .arrow{fill:none;stroke:var(--self-play-svg);stroke-width:1.8;opacity:0;stroke-dasharray:80;stroke-dashoffset:80;marker-end:url(#arrowhead);}
+    @keyframes drawArrow{to{stroke-dashoffset:0;opacity:0.7}}
+    @keyframes fadeArrow{to{opacity:0}}
+    .a1{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:0.3s,1.2s;}
+    .a2{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:3.4s,4.3s;}
+    .a3{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:5.8s,6.7s;}
+    .a4{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:8.8s,9.7s;}
+    .a5{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:11.8s,12.7s;}
+    .a6{animation:drawArrow 400ms ease forwards, fadeArrow 300ms ease forwards;animation-delay:14.8s,15.7s;}
+  </style>
+  
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1 1 L7 4 L1 7" fill="none" stroke="var(--self-play-svg)" stroke-width="1.5" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  
+  <g transform="translate(30,40)">
+    <!-- Single AI Agent that moves -->
+    <circle class="agent" cy="120" r="24"/>
+    
+    <!-- Central Game Board (3x3 grid) -->
+    <g transform="translate(108,90)">
+      <rect class="board" x="0" y="0" width="44" height="44" rx="2"/>
+      <line class="board-cell" x1="14.6" y1="0" x2="14.6" y2="44"/>
+      <line class="board-cell" x1="29.3" y1="0" x2="29.3" y2="44"/>
+      <line class="board-cell" x1="0" y1="14.6" x2="44" y2="14.6"/>
+      <line class="board-cell" x1="0" y1="29.3" x2="44" y2="29.3"/>
+      
+      <!-- Moves on board (X and O) -->
+      <!-- X moves (AI left) -->
+      <g class="move m1 move-x">
+        <line x1="4" y1="4" x2="10.6" y2="10.6"/>
+        <line x1="10.6" y1="4" x2="4" y2="10.6"/>
+      </g>
+      <g class="move m3 move-x">
+        <line x1="18.6" y1="18.6" x2="25.3" y2="25.3"/>
+        <line x1="25.3" y1="18.6" x2="18.6" y2="25.3"/>
+      </g>
+      <g class="move m5 move-x">
+        <line x1="33.4" y1="4" x2="40" y2="10.6"/>
+        <line x1="40" y1="4" x2="33.4" y2="10.6"/>
+      </g>
+      
+      <!-- O moves (AI right) -->
+      <g class="move m2 move-o">
+        <circle cx="37" cy="22" r="5.3"/>
+      </g>
+      <g class="move m4 move-o">
+        <circle cx="7.3" cy="22" r="5.3"/>
+      </g>
+      <g class="move m6 move-o">
+        <circle cx="22" cy="37" r="5.3"/>
+      </g>
+    </g>
+    
+    <!-- Turn arrows -->
+    <path class="arrow a1" d="M64 120 L102 110"/>
+    <path class="arrow a2" d="M196 120 L158 118"/>
+    <path class="arrow a3" d="M64 120 L102 118"/>
+    <path class="arrow a4" d="M196 120 L158 118"/>
+    <path class="arrow a5" d="M64 120 L102 106"/>
+    <path class="arrow a6" d="M196 120 L158 130"/>
+  </g>
+</svg>
