@@ -469,6 +469,7 @@ td:first-child {
 
 .section-content {
   max-width: 800px;
+  min-height: 90vh;
   text-align: center;
 }
 
@@ -564,47 +565,56 @@ td:first-child {
 #components h2 {
   font-size: 3rem;
   font-weight: 700;
-  margin: 0 0 60px 0;
+  margin: 0 0 20px 0;
   color: var(--text);
 }
 
 .info-cards {
   display: flex;
-  gap: 24px;
+  gap: 50px;
   justify-content: center;
-  flex-wrap: wrap;
-  max-width: 1000px;
+  
+  margin-top: 200px;
 }
 
 .info-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  height: 900px;
   flex: 1;
-  min-width: 280px;
-  max-width: 320px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s, box-shadow 0.2s;
+  min-width: 500px;
+  border: 1px solid var(--border);
 }
 
-.info-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+.card-image {
+  height: 50%;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+.card-content {
+  flex: 1;
+  padding: 32px;
+  background: var(--panel);
 }
 
 .info-card h3 {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 600;
   margin: 0 0 16px 0;
-  color: var(--accent);
+  color: var(--text);
 }
 
 .info-card p {
   color: var(--text);
   line-height: 1.6;
-  font-size: 1rem;
+  font-size: 1.1rem;
   margin: 0;
+  text-align: justify;
 }
 
 /* ===== Utility Classes ===== */

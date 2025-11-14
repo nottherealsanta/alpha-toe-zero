@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="100%" height="320" role="img" aria-hidden="true">
+  <style>
+    /* Prefer global theme variables when available, otherwise fall back */
+    :root{
+      --accent-svg: var(--accent, #0969da);
+      --conn-svg: var(--accent, var(--accent, #0969da));
+      --nodeStroke-svg: var(--nodeStroke, #24333f);
+    }
+    /* Nodes: appear staggered per-layer and row, then pulse */
+    .node{fill:#fff;stroke:var(--nodeStroke-svg);stroke-width:1.6;transform-box:fill-box;transform-origin:center;opacity:0;}
+    .node.visible{opacity:1}
+    @keyframes appear { from { opacity: 0; transform:translateY(6px) scale(0.98)} to { opacity: 1; transform:translateY(0) scale(1)} }
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+    /* connection lines: visible baseline + animated overlay */
+    /* baseline connections — always visible (faint) */
+    .conn{stroke:var(--conn-svg);stroke-width:1.2;stroke-linecap:round;fill:none;stroke-dasharray:0;stroke-dashoffset:0;opacity:1;stroke-opacity:.45}
+    /* animated overlay — draws on top when supported */
+    .conn-anim{stroke:var(--conn-svg);stroke-width:1.2;stroke-linecap:round;fill:none;stroke-dasharray:260;stroke-dashoffset:260;stroke-opacity:0.75}
+    @keyframes drawDash { to { stroke-dashoffset:0; stroke-opacity:1 } }
+    .conn-anim.fast{animation:drawDash 700ms ease forwards}
+    .conn-anim.slow{animation:drawDash 1100ms ease forwards}
+
+    /* helper classes for stagger timings */
+    .layer-left .node{animation:appear 360ms ease forwards}
+    .layer-middle .node{animation:appear 360ms ease forwards;}
+    .layer-right .node{animation:appear 360ms ease forwards;}
+
+    /* per-row delays for a subtle wave */
+    .r1{animation-delay:0.15s}.r2{animation-delay:0.30s}.r3{animation-delay:0.45s}
+    .r4{animation-delay:0.60s}.r5{animation-delay:0.75s}
+
+    /* middle/right layers will start after connections draw */
+    .layer-middle .node{animation-delay:calc(var(--row-delay,0s) + 0.9s)}
+    .layer-right .node{animation-delay:calc(var(--row-delay,0s) + 1.9s)}
+
+    /* small pulse applied after appear completes */
+    .node.pulse{animation: pulse 1600ms ease-in-out infinite; animation-delay: 2s}
+  </style>
+
+  <g transform="translate(24,36)">
+    <!-- connections left->mid (drawn after left nodes appear) -->
+    <g class="conn conn-left-mid">
+      <path class="conn c c1 fast" d="M16 20 Q 70 20 124 20" style="animation-delay:0.85s"/>
+      <path class="conn c c2 fast" d="M16 20 Q 70 30 124 52" style="animation-delay:0.88s"/>
+      <path class="conn c c3 fast" d="M16 20 Q 70 45 124 84" style="animation-delay:0.91s"/>
+      <path class="conn c c4 fast" d="M16 20 Q 70 60 124 116" style="animation-delay:0.94s"/>
+      <path class="conn c c5 fast" d="M16 20 Q 70 75 124 148" style="animation-delay:0.97s"/>
+      <path class="conn c c6 fast" d="M16 52 Q 70 38 124 20" style="animation-delay:1.00s"/>
+      <path class="conn c c7 fast" d="M16 52 Q 70 52 124 52" style="animation-delay:1.03s"/>
+      <path class="conn c c8 fast" d="M16 52 Q 70 65 124 84" style="animation-delay:1.06s"/>
+      <path class="conn c c9 fast" d="M16 52 Q 70 80 124 116" style="animation-delay:1.09s"/>
+      <path class="conn c c10 fast" d="M16 52 Q 70 95 124 148" style="animation-delay:1.12s"/>
+      <path class="conn c c11 fast" d="M16 84 Q 70 55 124 20" style="animation-delay:1.15s"/>
+      <path class="conn c c12 fast" d="M16 84 Q 70 68 124 52" style="animation-delay:1.18s"/>
+      <path class="conn c c13 fast" d="M16 84 Q 70 84 124 84" style="animation-delay:1.21s"/>
+      <path class="conn c c14 fast" d="M16 84 Q 70 98 124 116" style="animation-delay:1.24s"/>
+      <path class="conn c c15 fast" d="M16 84 Q 70 112 124 148" style="animation-delay:1.27s"/>
+      <path class="conn c c16 fast" d="M16 116 Q 70 72 124 20" style="animation-delay:1.30s"/>
+      <path class="conn c c17 fast" d="M16 116 Q 70 85 124 52" style="animation-delay:1.33s"/>
+      <path class="conn c c18 fast" d="M16 116 Q 70 98 124 84" style="animation-delay:1.36s"/>
+      <path class="conn c c19 fast" d="M16 116 Q 70 116 124 116" style="animation-delay:1.39s"/>
+      <path class="conn c c20 fast" d="M16 116 Q 70 130 124 148" style="animation-delay:1.42s"/>
+      <path class="conn c c21 fast" d="M16 148 Q 70 88 124 20" style="animation-delay:1.45s"/>
+      <path class="conn c c22 fast" d="M16 148 Q 70 102 124 52" style="animation-delay:1.48s"/>
+      <path class="conn c c23 fast" d="M16 148 Q 70 114 124 84" style="animation-delay:1.51s"/>
+      <path class="conn c c24 fast" d="M16 148 Q 70 130 124 116" style="animation-delay:1.54s"/>
+      <path class="conn c c25 fast" d="M16 148 Q 70 148 124 148" style="animation-delay:1.57s"/>
+    </g>
+
+    <!-- connections mid->right (drawn after middle nodes appear) -->
+    <g class="conn conn-mid-right slow">
+      <path class="conn m m1 slow" d="M124 20 Q 180 20 232 20" style="animation-delay:2.75s"/>
+      <path class="conn m m2 slow" d="M124 20 Q 180 30 232 52" style="animation-delay:2.78s"/>
+      <path class="conn m m3 slow" d="M124 20 Q 180 45 232 84" style="animation-delay:2.81s"/>
+      <path class="conn m m4 slow" d="M124 20 Q 180 60 232 116" style="animation-delay:2.84s"/>
+      <path class="conn m m5 slow" d="M124 20 Q 180 75 232 148" style="animation-delay:2.87s"/>
+      <path class="conn m m6 slow" d="M124 52 Q 180 38 232 20" style="animation-delay:2.90s"/>
+      <path class="conn m m7 slow" d="M124 52 Q 180 52 232 52" style="animation-delay:2.93s"/>
+      <path class="conn m m8 slow" d="M124 52 Q 180 65 232 84" style="animation-delay:2.96s"/>
+      <path class="conn m m9 slow" d="M124 52 Q 180 80 232 116" style="animation-delay:2.99s"/>
+      <path class="conn m m10 slow" d="M124 52 Q 180 95 232 148" style="animation-delay:3.02s"/>
+      <path class="conn m m11 slow" d="M124 84 Q 180 55 232 20" style="animation-delay:3.05s"/>
+      <path class="conn m m12 slow" d="M124 84 Q 180 68 232 52" style="animation-delay:3.08s"/>
+      <path class="conn m m13 slow" d="M124 84 Q 180 84 232 84" style="animation-delay:3.11s"/>
+      <path class="conn m m14 slow" d="M124 84 Q 180 98 232 116" style="animation-delay:3.14s"/>
+      <path class="conn m m15 slow" d="M124 84 Q 180 112 232 148" style="animation-delay:3.17s"/>
+      <path class="conn m m16 slow" d="M124 116 Q 180 72 232 20" style="animation-delay:3.20s"/>
+      <path class="conn m m17 slow" d="M124 116 Q 180 85 232 52" style="animation-delay:3.23s"/>
+      <path class="conn m m18 slow" d="M124 116 Q 180 98 232 84" style="animation-delay:3.26s"/>
+      <path class="conn m m19 slow" d="M124 116 Q 180 116 232 116" style="animation-delay:3.29s"/>
+      <path class="conn m m20 slow" d="M124 116 Q 180 130 232 148" style="animation-delay:3.32s"/>
+      <path class="conn m m21 slow" d="M124 148 Q 180 88 232 20" style="animation-delay:3.35s"/>
+      <path class="conn m m22 slow" d="M124 148 Q 180 102 232 52" style="animation-delay:3.38s"/>
+      <path class="conn m m23 slow" d="M124 148 Q 180 114 232 84" style="animation-delay:3.41s"/>
+      <path class="conn m m24 slow" d="M124 148 Q 180 130 232 116" style="animation-delay:3.44s"/>
+      <path class="conn m m25 slow" d="M124 148 Q 180 148 232 148" style="animation-delay:3.47s"/>
+    </g>
+    <!-- nodes (rendered on top) -->
+    <!-- left layer -->
+    <g class="layer-left">
+      <g style="--row-delay:0s" class="r1">
+        <circle class="node r1" cx="16" cy="20" r="6"/>
+      </g>
+      <g style="--row-delay:0.15s" class="r2">
+        <circle class="node r2" cx="16" cy="52" r="6"/>
+      </g>
+      <g style="--row-delay:0.30s" class="r3">
+        <circle class="node r3" cx="16" cy="84" r="6"/>
+      </g>
+      <g style="--row-delay:0.45s" class="r4">
+        <circle class="node r4" cx="16" cy="116" r="6"/>
+      </g>
+      <g style="--row-delay:0.60s" class="r5">
+        <circle class="node r5" cx="16" cy="148" r="6"/>
+      </g>
+    </g>
+
+    <!-- middle layer -->
+    <g class="layer-middle">
+      <g style="--row-delay:0s" class="r1">
+        <circle class="node r1" cx="124" cy="20" r="6"/>
+      </g>
+      <g style="--row-delay:0.15s" class="r2">
+        <circle class="node r2" cx="124" cy="52" r="6"/>
+      </g>
+      <g style="--row-delay:0.30s" class="r3">
+        <circle class="node r3" cx="124" cy="84" r="6"/>
+      </g>
+      <g style="--row-delay:0.45s" class="r4">
+        <circle class="node r4" cx="124" cy="116" r="6"/>
+      </g>
+      <g style="--row-delay:0.60s" class="r5">
+        <circle class="node r5" cx="124" cy="148" r="6"/>
+      </g>
+    </g>
+
+    <!-- right layer -->
+    <g class="layer-right">
+      <g style="--row-delay:0s" class="r1">
+        <circle class="node r1" cx="232" cy="20" r="6"/>
+      </g>
+      <g style="--row-delay:0.15s" class="r2">
+        <circle class="node r2" cx="232" cy="52" r="6"/>
+      </g>
+      <g style="--row-delay:0.30s" class="r3">
+        <circle class="node r3" cx="232" cy="84" r="6"/>
+      </g>
+      <g style="--row-delay:0.45s" class="r4">
+        <circle class="node r4" cx="232" cy="116" r="6"/>
+      </g>
+      <g style="--row-delay:0.60s" class="r5">
+        <circle class="node r5" cx="232" cy="148" r="6"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -122,21 +122,37 @@
      <!-- Components -->
      <section id="components" class="snap-section">
        <div class="section-content">
-         <h2>3 Components of AlphaZero</h2>
-         <div class="info-cards">
-           <div class="info-card">
-             <h3>αMCTS</h3>
-             <p>Alpha Monte Carlo Tree Search combines traditional MCTS with neural network guidance for more efficient exploration of the game tree.</p>
-           </div>
-           <div class="info-card">
-             <h3>Neural Network</h3>
-             <p>The NN evaluates board positions and predicts move probabilities, learning from self-play games to improve decision-making.</p>
-           </div>
-           <div class="info-card">
-             <h3>Self-Play</h3>
-             <p>The AI plays against itself millions of times, generating training data to learn optimal strategies without human intervention.</p>
-           </div>
-         </div>
+         <h2>Three things to know about AlphaZero</h2>
+          <div class="info-cards">
+            <div class="info-card">
+              <h3>αMCTS</h3>
+              <div class="card-image">
+                <!-- inline or external SVG for αMCTS -->
+                <img src="./assets/alpha-mcts.svg" alt="αMCTS — Alpha Monte Carlo Tree Search" style="width:100%; object-fit:contain;" />
+              </div>
+              <div class="card-content">
+                <p>𝛼MCTS (AlphaZero's Variant of Monte Carlo Tree Search) is mixture of the vanilla MCTS guided by two neural networks: policy network that suggests actions;value network that evaluates(scores) state. 
+MCTS is a method to tranverse the game tree (tree of states and actions) to find the next best action.
+</p>
+              </div>
+            </div>
+            <div class="info-card">
+              <h3>Neural Network</h3>
+              <div class="card-image">
+                <img src="./assets/neural-net.svg" alt="Neural Network" style="width:100%; object-fit:contain;" />
+              </div>
+              <div class="card-content">
+                <p>The NN evaluates board positions and predicts move probabilities, learning from self-play games to improve decision-making.</p>
+              </div>
+            </div>
+            <div class="info-card">
+              <h3>Self-Play</h3>
+              <div class="card-image"></div>
+              <div class="card-content">
+                <p>The AI plays against itself millions of times, generating training data to learn optimal strategies without human intervention.</p>
+              </div>
+            </div>
+          </div>
        </div>
      </section>
    </main>
@@ -152,4 +168,53 @@
     initHeroAnimation();
   </script>
 </body>
+
+  <script>
+    // Inline neural-net.svg and randomize edge animation delays so edges draw in random order
+    (function inlineAndRandomize(){
+      const selector = '.info-card .card-image img[alt="Neural Network"]';
+      const img = document.querySelector(selector);
+      if(!img) return;
+      fetch(img.src).then(r=>r.text()).then(svgText=>{
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = svgText;
+        const svg = wrapper.querySelector('svg');
+        if(!svg) return;
+
+        // remove width/height attributes so SVG scales with container
+        svg.removeAttribute('width'); svg.removeAttribute('height');
+
+        // randomize animation delays for animated overlay paths
+        // left->mid edges should start after left nodes; mid->right after middle nodes
+        const leftBase = 900; // ms after left nodes appear
+        const midBase = 2500; // ms after middle nodes appear
+        const paths = svg.querySelectorAll('path');
+        // randomly drop ~50% of edges to create sparse connections
+        const keepProbability = 0.5;
+        const kept = [];
+        paths.forEach((p)=>{
+          if(Math.random() > keepProbability){
+            // remove the path from the SVG to drop the edge
+            p.parentNode.removeChild(p);
+            return;
+          }
+          kept.push(p);
+        });
+
+        // apply randomized animation delay and stroke width to kept paths
+        kept.forEach((p)=>{
+          p.classList.add('conn-anim');
+          const isMidRight = p.classList.contains('m');
+          const base = isMidRight ? midBase : leftBase;
+          const rnd = Math.random() * 1200; // up to 1.2s random offset
+          p.style.animationDelay = (base + rnd)/1000 + 's';
+          const w = 0.9 + Math.random() * 0.9;
+          p.style.strokeWidth = w.toFixed(2) + 'px';
+        });
+
+        // place the SVG inline replacing the <img>
+        img.parentNode.replaceChild(svg, img);
+      }).catch(()=>{});
+    })();
+  </script>
 
