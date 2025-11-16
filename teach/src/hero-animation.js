@@ -1,10 +1,7 @@
 /**
  * Hero Animation
- * Displays a background animation of X and O shapes.
+ * Displays a background animation of X and O tiles.
  */
-import * as THREE from 'three';
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
-
 export function initHeroAnimation() {
     const container = document.getElementById('hero-bg');
     if (!container) {
@@ -12,96 +9,52 @@ export function initHeroAnimation() {
         return;
     }
 
-    let scene, camera, renderer;
-    const objects = [];
-    const NUM_OBJECTS = 150; // Fixed number of objects
+    // Clear existing content
+    container.innerHTML = '';
 
-    function init() {
-        // Scene
-        scene = new THREE.Scene();
+    // Setup hero background tiles
+    const fragment = document.createDocumentFragment();
+    // Calculate how many tiles we need to fill the viewport (using 40px tiles)
+    const tilesX = Math.ceil(window.innerWidth / 40);
+    const tilesY = Math.ceil(window.innerHeight / 40);
+    const totalTiles = tilesX * tilesY;
 
-        // Camera
-        camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.z = 50;
-
-        // Renderer
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        container.appendChild(renderer.domElement);
-
-        // Load SVGs and create objects
-        loadSVG('/assets/x.svg', 0);
-        loadSVG('/assets/o.svg', 1);
-
-        // Event Listeners
-        window.addEventListener('resize', onWindowResize);
-
-        animate();
+    for (let i = 0; i < totalTiles; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        fragment.appendChild(tile);
     }
+    container.appendChild(fragment);
+    startHeroAnimation();
+}
 
-    function loadSVG(url, type) {
-        const loader = new SVGLoader();
-        loader.load(url, (data) => {
-            const paths = data.paths;
-            const group = new THREE.Group();
-            group.scale.multiplyScalar(0.1);
-            group.scale.y *= -1;
+/**
+ * Start hero background animation
+ */
+function startHeroAnimation() {
+    const tiles = document.querySelectorAll('.tile');
+    const targetFillPercentage = 0.35; // 35% of tiles should be filled
+    const targetCount = Math.floor(tiles.length * targetFillPercentage);
 
-            for (let i = 0; i < paths.length; i++) {
-                const path = paths[i];
-                const material = new THREE.MeshBasicMaterial({
-                    color: path.color,
-                    side: THREE.DoubleSide,
-                    depthWrite: false
-                });
-                const shapes = SVGLoader.createShapes(path);
-                for (let j = 0; j < shapes.length; j++) {
-                    const shape = shapes[j];
-                    const geometry = new THREE.ShapeGeometry(shape);
-                    const mesh = new THREE.Mesh(geometry, material);
-                    group.add(mesh);
-                }
-            }
-            
-            // Distribute objects
-            for (let i = 0; i < NUM_OBJECTS / 2; i++) {
-                const object = group.clone();
-                object.position.x = Math.random() * 100 - 50;
-                object.position.y = Math.random() * 100 - 50;
-                object.position.z = Math.random() * 100 - 50;
-                object.rotation.x = Math.random() * 2 * Math.PI;
-                object.rotation.y = Math.random() * 2 * Math.PI;
-                object.rotation.z = Math.random() * 2 * Math.PI;
-                object.userData.type = type;
-                objects.push(object);
-                scene.add(object);
-            }
-        });
-    }
+    const animate = () => {
+        const filledTiles = Array.from(tiles).filter(tile => tile.classList.contains('x') || tile.classList.contains('o'));
+        const emptyTiles = Array.from(tiles).filter(tile => !tile.classList.contains('x') && !tile.classList.contains('o'));
 
-    function onWindowResize() {
-        if (!container) return;
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-    }
+        const currentCount = filledTiles.length;
 
-    function animate() {
-        requestAnimationFrame(animate);
+        if (currentCount < targetCount && emptyTiles.length > 0) {
+            // Add a new X or O
+            const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+            const isX = Math.random() < 0.5;
+            randomTile.classList.add(isX ? 'x' : 'o');
+        } else if (currentCount > 0) {
+            // Randomly remove an X or O
+            const randomFilledTile = filledTiles[Math.floor(Math.random() * filledTiles.length)];
+            randomFilledTile.className = 'tile';
+        }
 
-        objects.forEach(object => {
-            if (object.userData.type === 0) { // X
-                object.rotation.x += 0.001;
-                object.rotation.y += 0.001;
-            } else { // O
-                object.rotation.x -= 0.001;
-                object.rotation.y -= 0.001;
-            }
-        });
+        setTimeout(animate, 400); // Animate every 400ms
+    };
 
-        renderer.render(scene, camera);
-    }
-
-    init();
+    animate();
 }

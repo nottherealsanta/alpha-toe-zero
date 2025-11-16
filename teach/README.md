@@ -10,23 +10,35 @@ An interactive web application that demonstrates AlphaZero-style reinforcement l
 - 🎯 **Heat Maps**: Visual representation of move probabilities overlaid on the 4 game boards
 - ⚡ **WebGPU/WASM Support**: Fast neural network inference using ONNX Runtime
 - 📱 **Responsive Design**: Clean, modern UI that works across devices
+- 🎨 **Dynamic Background**: Animated X/O tile background for visual appeal
+- 🎲 **3D Animations**: Interactive 3D board animations and component effects
 
 ## Project Structure
 
 ```
 teach/
-├── index.html              # Main HTML file with minimal markup
-├── package.json            # NPM configuration
-├── src/                    # JavaScript source modules
-│   ├── app.js             # Main application logic and initialization
-│   ├── game.js            # 4×4×4 Qubic game rules and logic
-│   ├── mcts.js            # Monte Carlo Tree Search implementation
-│   ├── model.js           # ONNX neural network wrapper
-│   ├── ui.js              # UI rendering and visualization
-│   ├── utils.js           # Utility functions
-│   └── styles.css         # Application styles
-└── assets/                 # Static assets
-    └── model_4x4x4.onnx   # Trained neural network model
+├── index.html                    # Main HTML file with minimal markup
+├── package.json                  # NPM configuration
+├── AGENTS.md                     # Agent guidelines for coding assistants
+├── src/                          # JavaScript source modules
+│   ├── show_3d_ttt_game.js      # Main application logic and initialization
+│   ├── game.js                  # 4×4×4 Qubic game rules and logic
+│   ├── mcts.js                  # Monte Carlo Tree Search implementation
+│   ├── model.js                 # ONNX neural network wrapper
+│   ├── ui.js                    # UI rendering and visualization
+│   ├── utils.js                 # Utility functions
+│   ├── hero-animation.js        # Background hero animation with X/O tiles
+│   ├── qubic-animation.js       # 3D qubic board animation
+│   ├── components-animation.js  # Component animations
+│   └── styles.css               # Application styles
+├── public/                       # Static assets served by Vite
+│   └── assets/
+│       ├── model_4x4x4.onnx     # Trained neural network model
+│       ├── x.svg                # X symbol for animations
+│       └── o.svg                # O symbol for animations
+├── docs/                         # Documentation
+├── notebooks/                    # Jupyter notebooks
+└── assets/                       # Legacy assets (may be removed)
 ```
 
 ## Architecture
@@ -67,12 +79,23 @@ User interface and rendering:
 - **Animations**: AI thinking indicators and game over overlays
 - **Statistics Display**: Real-time MCTS analysis table
 
-#### `app.js`
+#### `show_3d_ttt_game.js`
 Application orchestration:
 - **Event Handlers**: Mouse clicks, button interactions
 - **Game Flow**: Turn management, AI vs human coordination
 - **State Management**: Game state and UI synchronization
 - **Initialization**: Model loading and setup
+
+#### `hero-animation.js`
+Background animation system:
+- **Tile Generation**: Creates grid of X/O tiles filling viewport
+- **Animation Loop**: Randomly adds/removes symbols for dynamic background
+- **SVG Integration**: Uses vector graphics for crisp rendering
+
+#### `qubic-animation.js`
+3D board visualization:
+- **3D Rendering**: Animates the 4×4×4 game board in 3D space
+- **Interactive Elements**: Visual effects for game state changes
 
 ## Technical Details
 
@@ -108,9 +131,17 @@ The model runs entirely in the browser using ONNX Runtime Web:
 - **WebGPU**: Hardware acceleration when available
 - **WASM**: CPU fallback for compatibility
 - **Input Shape**: `[1, 2, 4, 4, 4]` (batch, channels, z, y, x)
-- **Outputs**: 
+- **Outputs**:
   - `policy_logits`: [64] unnormalized action preferences
   - `value`: [1] position evaluation
+
+### Animations
+
+The application includes several animation systems:
+- **Hero Background**: Grid of X/O tiles that randomly appear/disappear
+- **Qubic Board**: 3D rotation and movement effects for the game board
+- **UI Components**: Smooth transitions for buttons, overlays, and statistics
+- **AI Thinking**: Pulsing indicators during MCTS computation
 
 ## Setup & Installation
 
@@ -142,10 +173,11 @@ The model runs entirely in the browser using ONNX Runtime Web:
    npx http-server -p 8000
    ```
    
-   **Option C - Using Vite (already in package.json):**
-   ```bash
-   npm run dev
-   ```
+    **Option C - Using Vite (already in package.json):**
+    ```bash
+    npm run dev
+    ```
+    (Runs on http://localhost:5173 by default)
 
 4. **Open in browser**:
    ```
@@ -157,6 +189,7 @@ The model runs entirely in the browser using ONNX Runtime Web:
 - ⚠️ **File Protocol**: Due to CORS restrictions with ES modules and ONNX model loading, you **must** serve the files over HTTP. Simply opening `index.html` directly won't work.
 - 💡 **WebGPU**: For best performance, enable WebGPU in Chrome: `chrome://flags/#enable-unsafe-webgpu`
 - 🔄 **Fallback**: The app automatically falls back to WASM if WebGPU is unavailable
+- 🎨 **Assets**: Static assets are served from `public/assets/` via Vite dev server
 
 ## Usage
 
@@ -216,6 +249,10 @@ The application uses these default parameters:
 - **Total Thinking Time**: 5-15 seconds for 1000 simulations
 
 ## Development
+
+### Local Development Server
+
+The project uses Vite for development. Run `npm run dev` to start the dev server on http://localhost:5173. This server is typically kept running during development for hot reloading and fast iteration.
 
 ### File Organization
 

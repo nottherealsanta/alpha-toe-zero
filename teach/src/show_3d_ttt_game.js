@@ -209,38 +209,7 @@ function setupEventHandlers() {
   }
 }
 
-/**
- * Start hero background animation
- */
-function startHeroAnimation() {
-  const tiles = document.querySelectorAll('.tile');
-  const targetFillPercentage = 0.35; // 35% of tiles should be filled
-  const targetCount = Math.floor(tiles.length * targetFillPercentage);
 
-  const animate = () => {
-    const filledTiles = Array.from(tiles).filter(tile => tile.classList.contains('x') || tile.classList.contains('o'));
-    const emptyTiles = Array.from(tiles).filter(tile => !tile.classList.contains('x') && !tile.classList.contains('o'));
-    
-    const currentCount = filledTiles.length;
-
-    if (currentCount < targetCount && emptyTiles.length > 0) {
-      // Add a new X or O
-      const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-      const isX = Math.random() < 0.5;
-      randomTile.classList.add(isX ? 'x' : 'o');
-      randomTile.setAttribute('data-symbol', isX ? 'X' : 'O');
-    } else if (currentCount > 0) {
-      // Randomly remove an X or O
-      const randomFilledTile = filledTiles[Math.floor(Math.random() * filledTiles.length)];
-      randomFilledTile.className = 'tile';
-      randomFilledTile.removeAttribute('data-symbol');
-    }
-
-    setTimeout(animate, 400); // Animate every 400ms
-  };
-
-  animate();
-}
 
 /**
  * Initialize app
@@ -275,24 +244,6 @@ export async function init() {
    const gameOverOverlay = document.getElementById("gameOverOverlay");
    if (gameOverOverlay) gameOverOverlay.style.display = 'none';
 
-   // Setup hero background tiles
-   const heroBg = document.getElementById('hero-bg');
-   if (heroBg) {
-     const fragment = document.createDocumentFragment();
-     // Calculate how many tiles we need to fill the viewport (using 40px tiles)
-     const tilesX = Math.ceil(window.innerWidth / 40);
-     const tilesY = Math.ceil(window.innerHeight / 40);
-     const totalTiles = tilesX * tilesY;
-     
-     for (let i = 0; i < totalTiles; i++) {
-       const tile = document.createElement('div');
-       tile.className = 'tile';
-       fragment.appendChild(tile);
-     }
-     heroBg.appendChild(fragment);
-     startHeroAnimation();
-   }
-
   // Setup event handlers early so start buttons always work
   setupEventHandlers();
 
@@ -301,7 +252,7 @@ export async function init() {
 
   // Begin loading model in parallel (do not block button usage)
   try {
-    const ok = await model.load("./assets/model_4x4x4.onnx");
+    const ok = await model.load("/assets/model_4x4x4.onnx");
     modelReady = ok;
     if (!ok) {
       // Non-blocking: user can still play manually
