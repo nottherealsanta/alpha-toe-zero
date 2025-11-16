@@ -733,9 +733,6 @@ td:first-child {
   color: var(--muted);
 }
 
-.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
 
 /* ===== Qubic Animation Styles ===== */
 #qubic-animation {

@@ -1,191 +1,197 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <title>AlphaZero Qubic 4×4×4 — MCTS Explainer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<title>AlphaZero Qubic 4×4×4 — MCTS Explainer</title>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<!-- Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&amp;family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&amp;family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet"/>
+<!-- ONNX Runtime -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+<script>
+        // Configure WASM - disable threading to avoid JSEP issues
+        ort.env.wasm.numThreads = 1;
+        ort.env.wasm.simd = true;
+        // Disable WebGPU to avoid JSEP compatibility issues
+        ort.env.webgpu = { disabled: false };
+    </script>
+<!-- Styles -->
+<link href="./src/styles.css" rel="stylesheet"/>
+<!-- Thebe -->
+<!-- <link href="https://unpkg.com/thebe@latest/dist/thebe.css" rel="stylesheet">
+<script src="https://unpkg.com/thebe@latest/lib/index.js" type="text/javascript"></script> -->
+<!-- Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
 
-  <!-- Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-  <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
-
-  <!-- ONNX Runtime -->
-  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-  <script>
-    // Configure WASM - disable threading to avoid JSEP issues
-    ort.env.wasm.numThreads = 1;
-    ort.env.wasm.simd = true;
-    // Disable WebGPU to avoid JSEP compatibility issues
-    ort.env.webgpu = { disabled: false };
-  </script>
-  
-  <!-- Styles -->
-  <link rel="stylesheet" href="./src/styles.css" />
-
-  <!-- Thebe -->
-  <link rel="stylesheet" href="https://unpkg.com/thebe@latest/dist/thebe.css" />
-  <script type="text/javascript" src="https://unpkg.com/thebe@latest/lib/index.js"></script>
-</head>
-
-<body>
-   <!-- hero -->
-   <section id="hero">
-     <div id="hero-bg"></div>
-     <div class="hero-content">
-       <h1>AlphaToe</h1>
-       <p class="subtitle">AlphaZero on Tic-Tac-Toe</p>
-     </div>
-   </section>
-
-   <!-- qubic game board -->
-   <section id="qubic-game-board" class="snap-section">
-     <div class="section-content-wide">
-      <div class="intro-container">
-        <div class="intro-text">
-          <h2>See what it can do</h2>
-          <h3>3D Tic-Tac-Toe</h3>
-          <div class="explanation">
-            <p>Unlike 2D Tic-Tac-Toe played on a 3×3 grid, this is played on a 4×4×4 cube.</br>
-            You can win by getting four in a row horizontally, vertically, or diagonally, </br>
-            but across all three dimensions. This creates 76 possible winning lines instead </br>
-            of just 8, making it a much more complex and strategic game.</p>
-          </div>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="True" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&amp;family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&amp;family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet"/>
+<!-- <link href="https://fonts.cdnfonts.com/css/monaspace-argon" rel="stylesheet" />
+    <link href="https://unpkg.com/codemirror@5.65.16/lib/codemirror.css" rel="stylesheet" />
+    <link href="https://unpkg.com/thebe@latest/dist/thebe.css" rel="stylesheet" /> -->
+<link href="../src/styles.css" rel="stylesheet"/>
+<!-- <script src="https://unpkg.com/thebe@latest/lib/index.js" type="text/javascript"></script> -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="True" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Great+Vibes&amp;family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&amp;family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap" rel="stylesheet"/><link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet"/><link href="https://fonts.cdnfonts.com/css/monaspace-argon" rel="stylesheet"/><link href="https://unpkg.com/codemirror@5.65.16/lib/codemirror.css" rel="stylesheet"/><link href="https://unpkg.com/thebe@latest/dist/thebe.css" rel="stylesheet"/><link href="../src/styles.css" rel="stylesheet"/><script src="https://unpkg.com/thebe@latest/lib/index.js" type="text/javascript"></script><style>
+pre, code, .thebe pre, .cm-s-default, .CodeMirror, .CodeMirror pre {
+  font-family: 'Monaspace Argon', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace !important;
+  font-size: 14px;
+  line-height: 1.4;
+}
+</style></head>
+<body><div class="thebe-activate"></div><div class="thebe-status"></div><button id="restart-kernel">Restart Kernel</button>
+<div class="thebe-activate"></div>
+<div class="thebe-status"></div><button id="restart-kernel">Restart Kernel</button>
+<!-- hero -->
+<section id="hero">
+<div id="hero-bg"></div>
+<div class="hero-content">
+<h1>AlphaToe</h1>
+<p class="subtitle">AlphaZero on Tic-Tac-Toe</p>
+</div>
+</section>
+<!-- qubic game board -->
+<section class="snap-section" id="qubic-game-board">
+<div class="section-content-wide">
+<div class="intro-container">
+<div class="intro-text">
+<h2>See what it can do</h2>
+<h3>3D Tic-Tac-Toe</h3>
+<div class="explanation">
+<p>Unlike 2D Tic-Tac-Toe played on a 3×3 grid, this is played on a 4×4×4 cube.
+                            You can win by getting four in a row horizontally, vertically, or diagonally,
+                            but across all three dimensions. This creates 76 possible winning lines instead
+                            of just 8, making it a much more complex and strategic game.</p>
+</div>
+</div>
+<div id="qubic-animation"></div>
+</div>
+<div id="game-container">
+<section class="card" id="boards-wrap">
+<div id="startOverlay">
+<h2 style="text-align:center; height:2em; line-height:2em; margin:0; ">Who starts first?</h2>
+<div style="display:flex; gap:20px; justify-content:center;">
+<button id="humanStart" style="text-align:center;">I start</button>
+<button id="aiStart" style="text-align:center;">AI starts</button>
+</div>
+</div>
+<div id="boards">
+<canvas class="board" height="800" id="board0" width="800"></canvas>
+<canvas class="board" height="800" id="board1" width="800"></canvas>
+<canvas class="board" height="800" id="board2" width="800"></canvas>
+<canvas class="board" height="800" id="board3" width="800"></canvas>
+</div>
+<div id="gameOverOverlay">
+<h2 id="gameOverText"></h2>
+<div style="display:flex; gap:20px; justify-content:center;">
+<button id="playAgain">Play Again</button>
+<button id="resetGame">Reset</button>
+</div>
+</div>
+<div class="cell-tooltip" id="cell-tooltip"></div>
+<div class="cell-highlight" id="cell-highlight"></div>
+<div class="controls" style="margin-top:8px;">
+<div class="row-inline">
+<div id="aiStatus">
+<span id="aiLabel">AI</span>
+<span id="aiStatusText">Waiting</span>
+</div>
+<button id="run">Ask AI to help you</button>
+<button id="reset">Reset</button>
+</div>
+</div>
+<div class="parameters-section">
+<div class="parameters-title">Parameters</div>
+<div class="parameter-row">
+<span class="parameter-label"># simulations:</span>
+<span class="mono parameter-value" id="simsVal">1000</span>
+</div>
+<div class="parameter-row">
+<span class="parameter-label">c_puct:</span>
+<span class="mono parameter-value" id="cpuctVal">1.00</span>
+</div>
+<div class="parameter-row">
+<span class="parameter-label">Temperature τ:</span>
+<span class="mono parameter-value" id="tempVal">0.00</span>
+</div>
+<div class="parameter-row">
+<span class="parameter-label">Dirichlet ε:</span>
+<span class="mono parameter-value" id="epsVal">0.00</span>
+</div>
+<div class="parameter-row">
+<span class="parameter-label">Dirichlet α:</span>
+<span class="mono parameter-value" id="alphaVal">0.30</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</section>
+<!-- Load application modules -->
+<!-- Components -->
+<section class="snap-section" id="components">
+<div class="section-content">
+<h2>Three ideas to know aboutAlphaZero</h2>
+<div class="info-cards">
+<div class="info-card">
+<div class="card-content">
+<h3>αMCTS</h3>
+<p>MCTS is a search algorithm that explores the game tree by running many simulations. Unlike
+                            traditional MCTS, AlphaZero's version uses its neural network to guide the search.</p>
+</div>
+<div class="card-image">
+<img alt="αMCTS — Alpha Monte Carlo Tree Search" src="./assets/alpha-mcts.svg"/>
+</div>
+</div>
+<div class="info-card">
+<div class="card-image">
+<img alt="Neural Network" src="./assets/neural-net.svg"/>
+</div>
+<div class="card-content">
+<h3>Neural Network</h3>
+<p>It has two main functions: to suggest the most promising moves from the current position
+                            (policy head), and to estimate the chances of winning from that position (value head).</p>
+</div>
+</div>
+<div class="info-card">
+<div class="card-content">
+<h3>Self-Play</h3>
+<p>The model learns by playing against itself, starting with no knowledge of the game. Multiple
+                            games are played at every iteration, and at every iteration the model learns. </p>
+</div>
+<div class="card-image">
+<img alt="Self-Play" src="./assets/self-play.svg"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- <section class="snap-section" id="thebe-section">
+        <div class="section-content">
+            <h2>Try it yourself</h2>
+            <p>You can run the code yourself. Click the button below to activate the code cells.</p>
+            <div class="thebe-activate"></div>
+            <div class="thebe-status"></div>
+            <pre data-executable="true" data-language="python">print("hello")</pre>
         </div>
-        <div id="qubic-animation"></div>
-      </div>
-
-       <div id="game-container">
-         <section class="card" id="boards-wrap">
-           <div id="startOverlay">
-             <h2 style="text-align:center; height:2em; line-height:2em; margin:0; ">Who starts first?</h2>
-             <div style="display:flex; gap:20px; justify-content:center;">
-               <button id="humanStart" style="text-align:center;">I start</button>
-               <button id="aiStart" style="text-align:center;">AI starts</button>
-             </div>
-           </div>
-           <div id="boards">
-             <canvas id="board0" class="board" width="800" height="800"></canvas>
-             <canvas id="board1" class="board" width="800" height="800"></canvas>
-             <canvas id="board2" class="board" width="800" height="800"></canvas>
-             <canvas id="board3" class="board" width="800" height="800"></canvas>
-           </div>
-            <div id="gameOverOverlay">
-              <h2 id="gameOverText"></h2>
-              <div style="display:flex; gap:20px; justify-content:center;">
-                <button id="playAgain">Play Again</button>
-                <button id="resetGame">Reset</button>
-              </div>
-            </div>
-
-           <div id="cell-tooltip" class="cell-tooltip"></div>
-           <div id="cell-highlight" class="cell-highlight"></div>
-
-           <div class="controls" style="margin-top:8px;">
-             <div class="row-inline">
-               <div id="aiStatus">
-                 <span id="aiLabel">AI</span>
-                 <span id="aiStatusText">Waiting</span>
-               </div>
-               <button id="run">Ask AI to help you</button>
-               <button id="reset">Reset</button>
-             </div>
-           </div>
-
-           <div class="parameters-section">
-             <div class="parameters-title">Parameters</div>
-             <div class="parameter-row">
-               <span class="parameter-label"># simulations:</span>
-               <span class="mono parameter-value" id="simsVal">1000</span>
-             </div>
-             <div class="parameter-row">
-               <span class="parameter-label">c_puct:</span>
-               <span class="mono parameter-value" id="cpuctVal">1.00</span>
-             </div>
-             <div class="parameter-row">
-               <span class="parameter-label">Temperature τ:</span>
-               <span class="mono parameter-value" id="tempVal">0.00</span>
-             </div>
-             <div class="parameter-row">
-               <span class="parameter-label">Dirichlet ε:</span>
-               <span class="mono parameter-value" id="epsVal">0.00</span>
-             </div>
-             <div class="parameter-row">
-               <span class="parameter-label">Dirichlet α:</span>
-               <span class="mono parameter-value" id="alphaVal">0.30</span>
-             </div>
-           </div>
-         </section>
-
-        </div>
-     </div>
-   </section>
-
-  <!-- Load application modules -->
-     </section>
-
-     <!-- Components -->
-     <section id="components" class="snap-section">
-       <div class="section-content">
-         <h2>Three ideas to know about</br>AlphaZero</h2>
-          <div class="info-cards">
-            <div class="info-card">
-              <div class="card-content">
-                <h3>αMCTS</h3>
-                <p>MCTS is a search algorithm that explores the game tree by running many simulations. Unlike traditional MCTS, AlphaZero's version uses its neural network to guide the search.</p>
-              </div>
-              <div class="card-image">
-                <img src="./assets/alpha-mcts.svg" alt="αMCTS — Alpha Monte Carlo Tree Search" />
-              </div>
-            </div>
-            <div class="info-card">
-              <div class="card-image">
-                <img src="./assets/neural-net.svg" alt="Neural Network" />
-              </div>
-              <div class="card-content">
-                <h3>Neural Network</h3>
-                <p>It has two main functions: to suggest the most promising moves from the current position (policy head), and to estimate the chances of winning from that position (value head).</p>
-              </div>
-            </div>
-            <div class="info-card">
-              <div class="card-content">
-                <h3>Self-Play</h3>
-                <p>The model learns by playing against itself, starting with no knowledge of the game. Multiple games are played at every iteration, and at every iteration the model learns. </p>
-              </div>
-              <div class="card-image">
-                <img src="./assets/self-play.svg" alt="Self-Play" />
-              </div>
-            </div>
-          </div>
-       </div>
-     </section>
-
-     <section id="thebe-section" class="snap-section">
-      <div class="section-content">
-        <h2>Try it yourself</h2>
-        <p>You can run the code yourself. Click the button below to activate the code cells.</p>
-        <div class="thebe-activate"></div>
-        <div class="thebe-status"></div>
-        <pre data-executable="true" data-language="python">print("hello")</pre>
-      </div>
-    </section>
-   </main>
-
-  <!-- Load application modules -->
-  <script type="module">
-    import { init } from './src/show_3d_ttt_game.js';
-    import { initQubicAnimation } from './src/qubic-animation.js';
-    import { initHeroAnimation } from './src/hero-animation.js';
-    import './src/components-animation.js';
-    // Start animations immediately
-    await initQubicAnimation();
-    await initHeroAnimation();
-    // Now, initialize the main application logic
-    await init();
-  </script>
-  <script type="text/x-thebe-config">
+    </section> -->
+<!-- Load application modules -->
+<script type="module">
+        import { init } from './src/show_3d_ttt_game.js';
+        import { initQubicAnimation } from './src/qubic-animation.js';
+        import { initHeroAnimation } from './src/hero-animation.js';
+        import './src/components-animation.js';
+        // Start animations immediately
+        await initQubicAnimation();
+        await initHeroAnimation();
+        // Now, initialize the main application logic
+        await init();
+    </script>
+<!-- <script type="text/x-thebe-config">
     {
         "useBinder": false,
         "useJupyterLite": false,
@@ -202,5 +208,107 @@
         "mountStatusWidget": true
     }
   </script>
-</body>
+    <script type="text/x-thebe-config">{
+    "bootstrap": false,
+    "useBinder": false,
+    "useJupyterLite": false,
+    "requestKernel": true,
+    "serverSettings": {
+        "baseUrl": "http://localhost:8888",
+        "token": "test-secret",
+        "appendToken": true
+    },
+    "kernelOptions": {
+        "name": "python",
+        "kernelName": "python"
+    },
+    "mountActivateWidget": true,
+    "mountStatusWidget": true,
+    "mountRunButton": true,
+    "mountRunAllButton": false,
+    "mountRestartButton": false,
+    "mountRestartAllButton": false,
+    "codeMirrorConfig": {
+        "theme": "default",
+        "lineNumbers": false,
+        "readOnly": false,
+        "styleActiveLine": false,
+        "matchBrackets": false,
+        "autoRefresh": false
+    }
+            document.addEventListener('click', function (e) {
+                var target = e.target || e.srcElement;
+                if (target && target.classList && target.classList.contains('run-cell')) {
+                    if (window.thebe) {
+                        var pre = target.nextElementSibling;
+                        if (pre && pre.tagName === 'PRE') {
+                            window.thebe.runCell(pre);
+                        }
+                    }
+                }
+            });
+        })();</script> -->
+<script type="text/x-thebe-config">{
+    "bootstrap": false,
+    "useBinder": false,
+    "useJupyterLite": false,
+    "requestKernel": true,
+    "serverSettings": {
+        "baseUrl": "http://localhost:8888",
+        "token": "test-secret",
+        "appendToken": true
+    },
+    "kernelOptions": {
+        "name": "python",
+        "kernelName": "python"
+    },
+    "mountActivateWidget": true,
+    "mountStatusWidget": true,
+    "mountRunButton": true,
+    "mountRunAllButton": false,
+    "mountRestartButton": false,
+    "mountRestartAllButton": false,
+    "codeMirrorConfig": {
+        "theme": "default",
+        "lineNumbers": false,
+        "readOnly": false,
+        "styleActiveLine": false,
+        "matchBrackets": false,
+        "autoRefresh": false
+    }
+}</script><script>(function() {
+    function adjustPreHeights() {
+        try {
+            document.querySelectorAll('pre[data-executable]').forEach(function(el) {
+                var h = el.getBoundingClientRect().height;
+                if (h) el.style.minHeight = h + 'px';
+            });
+        } catch (e) {
+            console.warn('adjustPreHeights error', e);
+        }
+    }
+    // Run now and on DOMContentLoaded
+    adjustPreHeights();
+    document.addEventListener('DOMContentLoaded', adjustPreHeights);
 
+    var restartBtn = document.getElementById('restart-kernel');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', function() {
+            if (window.thebe && typeof window.thebe.restart === 'function') {
+                window.thebe.restart();
+            }
+        });
+    }
+    document.addEventListener('click', function(e) {
+        var target = e.target || e.srcElement;
+        if (target && target.classList && target.classList.contains('run-cell')) {
+            if (window.thebe) {
+                var pre = target.nextElementSibling;
+                if (pre && pre.tagName === 'PRE') {
+                    window.thebe.runCell(pre);
+                }
+            }
+        }
+    });
+})();</script></body>
+</html>
