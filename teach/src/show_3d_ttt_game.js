@@ -84,8 +84,27 @@ async function aiMove() {
 }
 
 /**
- * Setup event handlers
- */
+  * Reset game state and show start choice
+  */
+async function resetGameState() {
+  game = new Game();
+  lastRoot = null;
+  drawAll(ctxs, game.board, null);
+  startPlayer = null;
+
+  const gameOverOverlay = document.getElementById("gameOverOverlay");
+  if (gameOverOverlay) gameOverOverlay.style.display = 'none';
+
+  await showStartChoice();
+  game.player = startPlayer;
+  if (startPlayer === -1) {
+    await aiMove();
+  }
+}
+
+/**
+  * Setup event handlers
+  */
 function setupEventHandlers() {
   // Board clicks (human move)
   canvases.forEach((cv, z) => {
@@ -134,41 +153,18 @@ function setupEventHandlers() {
   // Reset button
   const resetBtn = document.getElementById("reset");
   if (resetBtn) {
-    resetBtn.addEventListener("click", async () => {
-      game = new Game();
-      lastRoot = null;
-      drawAll(ctxs, game.board, null);
-      startPlayer = null;
-      
-      const gameOverOverlay = document.getElementById("gameOverOverlay");
-      if (gameOverOverlay) gameOverOverlay.style.display = 'none';
-      
-      await showStartChoice();
-      game.player = startPlayer;
-      if (startPlayer === -1) {
-        await aiMove();
-      }
-    });
+    resetBtn.addEventListener("click", resetGameState);
   }
 
-  // Restart game button
-  const restartBtn = document.getElementById("restartGame");
-  if (restartBtn) {
-    restartBtn.addEventListener("click", async () => {
-      game = new Game();
-      lastRoot = null;
-      drawAll(ctxs, game.board, null);
-      startPlayer = null;
-      
-      const gameOverOverlay = document.getElementById("gameOverOverlay");
-      if (gameOverOverlay) gameOverOverlay.style.display = 'none';
-      
-      await showStartChoice();
-      game.player = startPlayer;
-      if (startPlayer === -1) {
-        await aiMove();
-      }
-    });
+  // Game over buttons
+  const playAgainBtn = document.getElementById("playAgain");
+  if (playAgainBtn) {
+    playAgainBtn.addEventListener("click", resetGameState);
+  }
+
+  const resetGameBtn = document.getElementById("resetGame");
+  if (resetGameBtn) {
+    resetGameBtn.addEventListener("click", resetGameState);
   }
 
   // Run MCTS button (Ask AI to help)

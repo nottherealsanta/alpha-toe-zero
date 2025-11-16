@@ -313,7 +313,7 @@ main {
 #gameOverOverlay {
   position: absolute;
   inset: 0;
-  background: var(--game-over-bg);
+  background: var(--start-overlay-bg);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -323,21 +323,28 @@ main {
 }
 
 #gameOverText {
-  color: white;
+  color: var(--text);
 }
 
-#restartGame {
-  background: var(--button-secondary-bg);
-  color: var(--text);
-  border: 1px solid var(--border);
+#gameOverOverlay button {
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent);
   border-radius: 0;
-  padding: 8px 10px;
+  padding: 12px 16px;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
   transition: background .15s, box-shadow .15s;
 }
 
-#restartGame:hover {
-  background: #eef2f7;
+#gameOverOverlay button:hover {
+  background: #0756cc;
+  box-shadow: 0 2px 4px rgba(9, 105, 218, 0.3);
+}
+
+#gameOverOverlay button:active {
+  background: #0645a3;
 }
 
 /* ===== Loading Spinner ===== */

@@ -72,10 +72,13 @@
              <canvas id="board2" class="board" width="800" height="800"></canvas>
              <canvas id="board3" class="board" width="800" height="800"></canvas>
            </div>
-           <div id="gameOverOverlay">
-             <h2 id="gameOverText"></h2>
-             <button id="restartGame">Play Again</button>
-           </div>
+            <div id="gameOverOverlay">
+              <h2 id="gameOverText"></h2>
+              <div style="display:flex; gap:20px; justify-content:center;">
+                <button id="playAgain">Play Again</button>
+                <button id="resetGame">Reset</button>
+              </div>
+            </div>
 
            <div id="cell-tooltip" class="cell-tooltip"></div>
            <div id="cell-highlight" class="cell-highlight"></div>
