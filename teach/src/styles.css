@@ -666,6 +666,18 @@ td:first-child {
   border: none;
 }
 
+/* Make the info-card anchor look like the card (no underline, inherit color) */
+.info-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.info-card-link:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .card-content {
   flex: 1;
   padding: 0;
