@@ -41,7 +41,7 @@ def add_thebe_core_to_html(html_path):
             crossorigin="anonymous",
         )
     )
-    gf_href = "https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+    gf_href = "https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Lora:ital,wght@0,400..700;1,400..700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
     soup.head.append(soup.new_tag("link", href=gf_href, rel="stylesheet"))
 
     # Add RequireJS for Jupyter widget support
@@ -392,6 +392,7 @@ a {
 .jp-RenderedMarkdown > h2,
 .jp-RenderedMarkdown > h3 {
     color: var(--accent) !important;
+    font-family: 'Lora', serif;
 }
 
 .jp-RenderedMarkdown > h1 {
