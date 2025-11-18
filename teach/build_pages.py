@@ -35,7 +35,10 @@ def add_thebe_core_to_html(html_path):
     )
     soup.head.append(
         soup.new_tag(
-            "link", rel="preconnect", href="https://fonts.gstatic.com", crossorigin=True
+            "link",
+            rel="preconnect",
+            href="https://fonts.gstatic.com",
+            crossorigin="anonymous",
         )
     )
     gf_href = "https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
@@ -100,8 +103,16 @@ def add_thebe_core_to_html(html_path):
             # Add run button
             run_button = soup.new_tag("button")
             run_button["class"] = "cell-run-button"
-            run_button.string = "Run"
-            source_container.append(run_button)
+            svg = soup.new_tag("svg")
+            svg["width"] = "24"
+            svg["height"] = "24"
+            svg["viewBox"] = "0 0 24 24"
+            path = soup.new_tag("path")
+            path["d"] = "M8 5v14l11-7z"
+            path["fill"] = "white"
+            svg.append(path)
+            run_button.append(svg)
+            cell_wrapper.append(run_button)
 
             # Assemble the cell
             cell_wrapper.append(source_container)
@@ -128,7 +139,8 @@ body, .notebook, .container {
 .thebe-cell {
     margin: 1.5rem 0;
     border-radius: 0px;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
 }
 
 .thebe-source {
@@ -142,8 +154,8 @@ body, .notebook, .container {
 
 .thebe-source pre {
     margin: 0;
-    padding-left: 1rem;
-    padding-top: 1rem;
+    padding-left: 0.5rem;
+    padding-top: 0.5rem;
     padding-bottom: 1rem;
     overflow-x: auto;
 }
@@ -159,7 +171,7 @@ body, .notebook, .container {
 
 .thebe-output.thebe-output-has-content {
     display: block;
-    border-top: 1px solid var(--muted);
+    border-top: 1px solid var(--text-lite);
 }
 
 /* Controls styling */
@@ -178,8 +190,8 @@ body, .notebook, .container {
 
 .thebe-controls button {
     padding: 0.5rem 1rem;
-    border: 1px solid var(--muted);
-    background: var(--bg);
+    border: 1px solid var(--text-lite);
+    background: var(--cell-input-bg);
     color: var(--text);
     border-radius: 6px;
     cursor: pointer;
@@ -189,7 +201,9 @@ body, .notebook, .container {
 }
 
 .thebe-controls button:hover {
-    background: var(--code-bg);
+    background: var(--accent);
+    color: var(--color-white);
+    border-color: var(--accent);
 }
 
 .thebe-controls button:disabled {
@@ -242,16 +256,20 @@ body, .notebook, .container {
 /* Run button for each cell */
 .cell-run-button {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    background: var(--link);
-    color: white;
-    border: none;
-    border-radius: 4px;
+    left: -3rem;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    background: var(--accent);
+    color: var(--color-white);
+    border: 0px solid var(--text);
+    border-radius: 0px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
     font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 1;
     transition: opacity 0.2s;
 }
@@ -283,7 +301,6 @@ body, .notebook, .container {
     page_style.string = """
 body {
     padding-left: 0;
-    padding-right: 24px;
     box-sizing: border-box;
 }
 
@@ -302,8 +319,8 @@ body {
 
 @media (min-width: 900px) {
     body {
-        padding-left: 92px;
-        padding-right: 92px;
+        padding-left: 124px;
+        padding-right: 124px;
     }
 }
 """
@@ -313,19 +330,23 @@ body {
     theme_style = soup.new_tag("style")
     theme_style.string = """
 :root {
-    --bg: #ffffff;
-    --text: #1D1D20;
-    --muted: #6b6b6b;
-    --code-bg: #f5f5f7;
-    --link: #0b63d6;
+    --color-white: #ffffff;
+    --bg: #f9f9f6;
+    --text: #4D5461;
+    --text-lite: #737883;
+    --accent: #0969da;
+    --cell-input-bg: color-mix(in oklab, var(--color-white) 60%, transparent);
+    --cell-output-bg: transparent;
 }
 
 .theme-dark {
-    --bg: #0b0b0f;
-    --text: #e6e6e6;
-    --muted: #9b9b9b;
-    --code-bg: #0f1113;
-    --link: #6ea8ff;
+    --color-white: #ffffff;
+    --bg: #1a1a1f;
+    --text: #d4d5d9;
+    --text-lite: #9b9ca5;
+    --accent: #5b8bff;
+    --cell-input-bg: color-mix(in oklab, #2a2a35 80%, transparent);
+    --cell-output-bg: transparent;
 }
 
 body {
@@ -334,27 +355,43 @@ body {
     transition: background .2s ease, color .2s ease;
 }
 
-pre, code, .thebe-source pre, .thebe-output {
-    background: var(--code-bg) !important;
+pre, code {
+    background: var(--cell-input-bg) !important;
+    color: var(--text) !important;
+}
+
+.thebe-source pre {
+    border: 1px solid var(--text-lite);
+    background: var(--cell-input-bg) !important;
+    color: var(--text) !important;
+}
+
+.thebe-output {
+    background: var(--cell-output-bg) !important;
     color: var(--text) !important;
 }
 
 a { 
-    color: var(--link); 
+    color: var(--accent); 
 }
 
 .cm-editor {
-    background: var(--code-bg) !important;
     color: var(--text) !important;
 }
 
 .cm-gutters {
-    background: var(--code-bg) !important;
-    border-right: 1px solid var(--muted);
+    background: var(--cell-input-bg) !important;
+    border-right: 1px solid var(--text-lite);
 }
 
 .jp-RenderedMarkdown {
     color: var(--text) !important;
+}
+
+.jp-RenderedMarkdown > h1,
+.jp-RenderedMarkdown > h2,
+.jp-RenderedMarkdown > h3 {
+    color: var(--accent) !important;
 }
 
 .jp-RenderedMarkdown > h1 {
@@ -362,12 +399,42 @@ a {
     font-weight: 500;
     line-height: 1.2;
 }
+
+.jp-RenderedMarkdown > h2 {
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.jp-RenderedMarkdown > h3 {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
 .jp-RenderedMarkdown > p, li {
     font-size: 16px;
     line-height: 1.4;
 }
 
 .jp-Cell-inputArea {
+}
+
+.jp-InputPrompt {
+    position: absolute;
+    left: -4rem;
+    top: 0.5rem;
+    font-family: 'Fira Code', monospace;
+    color: var(--text-lite);
+    width: 3.5rem;
+    text-align: right;
+    font-size: 14px;
+}
+
+.jp-OutputArea-output pre {
+    background: var(--cell-output-bg) !important;
+    color: var(--text) !important;
+    border: none !important;
 }
 
 """
@@ -548,11 +615,14 @@ function initializeThebe() {
                 preElement.contentEditable = 'true';
                 preElement.style.whiteSpace = 'pre';
                 preElement.style.fontFamily = 'monospace';
-                preElement.style.backgroundColor = 'var(--code-bg)';
+                preElement.style.backgroundColor = 'var(--cell-input-bg)';
                 preElement.style.color = 'var(--text)';
-                preElement.style.padding = '1rem';
+                preElement.style.paddingRight = '0rem';
+                preElement.style.paddingLeft = '0.5rem';
+                preElement.style.paddingTop = '0.5rem';
+                preElement.style.paddingBottom = '0.5rem';
                 preElement.style.borderRadius = '0px';
-                preElement.style.border = 'none';
+                 preElement.style.border = '1px solid var(--text-lite)';
                 preElement.style.outline = 'none';
                 preElement.style.minHeight = '2rem';
 
