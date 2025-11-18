@@ -38,7 +38,7 @@ def add_thebe_core_to_html(html_path):
             "link", rel="preconnect", href="https://fonts.gstatic.com", crossorigin=True
         )
     )
-    gf_href = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono:wght@400;700&display=swap"
+    gf_href = "https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
     soup.head.append(soup.new_tag("link", href=gf_href, rel="stylesheet"))
 
     # Add RequireJS for Jupyter widget support
@@ -115,19 +115,19 @@ def add_thebe_core_to_html(html_path):
     style_tag.string = """
 /* Font settings */
 pre, code, .thebe-source pre, .cm-editor, .cm-content {
-    font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace !important;
-    font-size: 14px;
-    line-height: 1.5;
+    font-family: 'Fira Code', monospace,'Courier New', monospace !important;
+    font-size: 16px;
+    line-height: 1.4;
 }
 
 body, .notebook, .container {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-family: 'Noto Sans', Arial, sans-serif !important;
 }
 
 /* Thebe cell structure */
 .thebe-cell {
     margin: 1.5rem 0;
-    border-radius: 8px;
+    border-radius: 0px;
     overflow: hidden;
 }
 
@@ -142,14 +142,14 @@ body, .notebook, .container {
 
 .thebe-source pre {
     margin: 0;
-    padding: 1rem;
-    border-radius: 8px 8px 0 0;
+    padding-left: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     overflow-x: auto;
 }
 
 .thebe-output {
-    padding: 0.75rem 1rem;
-    border-radius: 0 0 8px 8px;
+    padding-left: 0.5rem;
     min-height: 0;
 }
 
@@ -180,7 +180,7 @@ body, .notebook, .container {
     padding: 0.5rem 1rem;
     border: 1px solid var(--muted);
     background: var(--bg);
-    color: var(--fg);
+    color: var(--text);
     border-radius: 6px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
@@ -270,10 +270,6 @@ body, .notebook, .container {
 }
 
 .thebe-editor .CodeMirror {
-    border-radius: 8px 8px 0 0;
-    font-family: 'Roboto Mono', monospace;
-    font-size: 14px;
-    line-height: 1.5;
 }
 
 .thebe-editor .CodeMirror-gutters {
@@ -318,7 +314,7 @@ body {
     theme_style.string = """
 :root {
     --bg: #ffffff;
-    --fg: #111111;
+    --text: #1D1D20;
     --muted: #6b6b6b;
     --code-bg: #f5f5f7;
     --link: #0b63d6;
@@ -326,7 +322,7 @@ body {
 
 .theme-dark {
     --bg: #0b0b0f;
-    --fg: #e6e6e6;
+    --text: #e6e6e6;
     --muted: #9b9b9b;
     --code-bg: #0f1113;
     --link: #6ea8ff;
@@ -334,13 +330,13 @@ body {
 
 body {
     background: var(--bg) !important;
-    color: var(--fg) !important;
+    color: var(--text) !important;
     transition: background .2s ease, color .2s ease;
 }
 
 pre, code, .thebe-source pre, .thebe-output {
     background: var(--code-bg) !important;
-    color: var(--fg) !important;
+    color: var(--text) !important;
 }
 
 a { 
@@ -349,13 +345,31 @@ a {
 
 .cm-editor {
     background: var(--code-bg) !important;
-    color: var(--fg) !important;
+    color: var(--text) !important;
 }
 
 .cm-gutters {
     background: var(--code-bg) !important;
     border-right: 1px solid var(--muted);
 }
+
+.jp-RenderedMarkdown {
+    color: var(--text) !important;
+}
+
+.jp-RenderedMarkdown > h1 {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+.jp-RenderedMarkdown > p, li {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.jp-Cell-inputArea {
+}
+
 """
     soup.head.append(theme_style)
 
@@ -535,9 +549,9 @@ function initializeThebe() {
                 preElement.style.whiteSpace = 'pre';
                 preElement.style.fontFamily = 'monospace';
                 preElement.style.backgroundColor = 'var(--code-bg)';
-                preElement.style.color = 'var(--fg)';
+                preElement.style.color = 'var(--text)';
                 preElement.style.padding = '1rem';
-                preElement.style.borderRadius = '8px 8px 0 0';
+                preElement.style.borderRadius = '0px';
                 preElement.style.border = 'none';
                 preElement.style.outline = 'none';
                 preElement.style.minHeight = '2rem';
