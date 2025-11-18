@@ -109,7 +109,7 @@ def add_thebe_core_to_html(html_path):
             svg["viewBox"] = "0 0 24 24"
             path = soup.new_tag("path")
             path["d"] = "M8 5v14l11-7z"
-            path["fill"] = "white"
+            path["fill"] = "var(--accent)"
             svg.append(path)
             run_button.append(svg)
             cell_wrapper.append(run_button)
@@ -269,9 +269,9 @@ body, .notebook, .container {
     width: 38px;
     height: 38px;
     padding: 0;
-    background: var(--accent);
-    color: var(--color-white);
-    border: 0px solid var(--text);
+    background: var(--bg);
+    color: black;
+    border: 0px ;
     border-radius: 0px;
     cursor: pointer;
     font-size: 14px;
@@ -288,7 +288,8 @@ body, .notebook, .container {
 }
 
 .cell-run-button:hover {
-    opacity: 0.9;
+    background: white;
+    border: 1px solid var(--accent);
 }
 
 /* CodeMirror editor styling */
