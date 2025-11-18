@@ -661,9 +661,20 @@ td:first-child {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 150px;
-  padding: 5px 0;
-  border: none;
+  gap: 24px;
+  padding-left: 32px;
+  padding-right: 32px;
+  margin-top: 12px;
+  border-radius: 0;
+  border: 2px solid transparent;
+}
+
+.info-card:hover {
+  background: #f9f9f6;
+  box-shadow: 0 4px 12px #00000015;
+  cursor: pointer;
+  border: 2px solid var(--accent);
+  transition: box-shadow 0.4s, border 0.4s, background 0.4s;
 }
 
 /* Make the info-card anchor look like the card (no underline, inherit color) */
@@ -680,16 +691,21 @@ td:first-child {
 
 .card-content {
   flex: 1;
-  padding: 0;
-  background: var(--bg);
+  background: transparent;
+  padding-left: 24px;
+  margin-right: 124px;
   text-align: left;
+}
+
+.info-card:hover .card-content h3 {
+  color: var(--accent);
+  transition: color 0.4s;
 }
 
 .card-image {
   flex: 0 0 auto;
-  width: 450px;
-  height: 450px;
-  background: var(--panel);
+  width: 350px;
+  height: 350px;
   display: flex;
   align-items: center;
   justify-content: center;

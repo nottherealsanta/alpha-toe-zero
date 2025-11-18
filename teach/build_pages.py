@@ -347,7 +347,7 @@ body {
             span = soup.new_tag("span")
             span.string = text_content
             heading.contents = [anchor, span]
-
+            
     # Theme variables
     theme_style = soup.new_tag("style")
     theme_style.string = """
