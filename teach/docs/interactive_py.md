@@ -1,7 +1,7 @@
 
 
 ```bash
-uvx jupyter lab --NotebookApp.token=3eda2f1a83 --NotebookApp.allow_origin='*' --no-browser
+uvx jupyter lab --NotebookApp.token=test-secret --NotebookApp.allow_origin='*' --no-browser
 ```
 
 ```
