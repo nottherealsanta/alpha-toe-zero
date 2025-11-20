@@ -175,7 +175,7 @@ def add_thebe_core_to_html(html_path, notebook_path):
             svg["viewBox"] = "0 0 24 24"
             path = soup.new_tag("path")
             path["d"] = "M8 5v14l11-7z"
-            path["fill"] = "var(--accent)"
+            path["fill"] = "currentColor"
             svg.append(path)
             run_button.append(svg)
             cell_wrapper.append(run_button)
@@ -390,14 +390,17 @@ body, .notebook, .container {
     gap: 10px;
     z-index: 1000;
     background: var(--bg);
-    padding: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .thebe-controls button {
     padding: 0.5rem 1rem;
-    border: 1px solid var(--text-lite);
+    border: 0px solid var(--text-lite);
     background: var(--cell-input-bg);
     color: var(--text);
     border-radius: 6px;
@@ -456,6 +459,13 @@ body, .notebook, .container {
     position: relative;
     width: 40px;
     height: 40px;
+    border: 0px !important;
+    background: transparent !important;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--accent) !important;
+    color: var(--color-white) !important;
 }
 
 .theme-toggle-btn svg {
@@ -507,13 +517,13 @@ body, .notebook, .container {
 /* Run button for each cell */
 .cell-run-button {
     position: absolute;
-    left: -3rem;
+    left: -2.75rem;
     width: 38px;
     height: 38px;
     padding: 0;
-    background: var(--bg);
-    color: black;
-    border: 0px ;
+    background: #ffffff77;
+    color: var(--text-lite);
+    border: 0px solid var(--text-lite);
     border-radius: 0px;
     cursor: pointer;
     font-size: 14px;
@@ -530,8 +540,8 @@ body, .notebook, .container {
 }
 
 .cell-run-button:hover {
-    background: white;
     border: 1px solid var(--accent);
+    color: var(--accent);
 }
 
 /* CodeMirror editor styling */
@@ -550,6 +560,10 @@ body, .notebook, .container {
 }
 .CodeMirror-vscrollbar{
 display: none;
+}
+.CodeMirror-cursor {
+    width: 2px !important;
+    background-color: var(--accent) !important;
 }
 """
     soup.head.append(style_tag)
@@ -902,6 +916,14 @@ function initializeThebe() {
     const controlsDiv = document.createElement('div');
     controlsDiv.className = 'thebe-controls';
     controlsDiv.innerHTML = `
+        
+        <div class="thebe-status">
+            <div class="thebe-status-indicator" id="status-indicator"></div>
+            <span id="status-text">Not connected</span>
+        </div>
+        <button id="connect-button">Connect</button>
+        <button id="run-all-button" disabled>Run All</button>
+        <button id="restart-button" disabled>Restart</button>
         <button id="theme-toggle-button" class="theme-toggle-btn" title="Toggle theme">
             <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="5"></circle>
@@ -918,13 +940,6 @@ function initializeThebe() {
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
         </button>
-        <div class="thebe-status">
-            <div class="thebe-status-indicator" id="status-indicator"></div>
-            <span id="status-text">Not connected</span>
-        </div>
-        <button id="connect-button">Connect</button>
-        <button id="run-all-button" disabled>Run All</button>
-        <button id="restart-button" disabled>Restart</button>
     `;
     document.body.insertBefore(controlsDiv, document.body.firstChild);
 
