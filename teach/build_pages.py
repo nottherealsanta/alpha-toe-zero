@@ -158,7 +158,7 @@ def add_thebe_core_to_html(html_path, notebook_path):
         output_container["class"] = "thebe-output"
 
         # Extract code content
-        code_content = input_div.get_text()
+        code_content = input_div.get_text().rstrip()
 
         # Create pre element for source
         source_pre = soup.new_tag("pre")
@@ -361,7 +361,7 @@ body, .notebook, .container {
     margin: 0;
     padding-left: 2rem;
     padding-top: 0.5rem;
-    padding-bottom: 1.3rem;
+    padding-bottom: 0.5rem;
     overflow-x: hidden;
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -745,6 +745,16 @@ main {
      margin-right: 0;
  }
 
+ .jp-CodeMirrorEditor {
+     width: 75%;
+     margin-right: auto;
+ }
+
+ .side-by-side-container .jp-CodeMirrorEditor {
+     width: 100%;
+     margin-right: 0;
+ }
+
  .jp-RenderedMarkdown > h1,
  .jp-RenderedMarkdown > h2,
  .jp-RenderedMarkdown > h3,
@@ -1058,7 +1068,7 @@ function initializeThebe() {
                 cm.getWrapperElement().style.border = '1px solid var(--text-lite)';
                 cm.getWrapperElement().style.paddingLeft = '1.7rem';
                 cm.getWrapperElement().style.paddingTop = '0.5rem';
-                cm.getWrapperElement().style.paddingBottom = '0rem';
+                cm.getWrapperElement().style.paddingBottom = '0.5rem';
                 cm.getWrapperElement().style.fontFamily = '"Fira Code", monospace';
                 cm.getWrapperElement().style.height = 'auto';
                 
