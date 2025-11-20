@@ -847,6 +847,78 @@ main {
   display: none;
  }
 
+ /* Table styling */
+ table {
+     border-collapse: collapse;
+     width: auto;
+     margin: 1.5rem auto;
+     font-size: 15px;
+     background: var(--bg);
+     border: 2px solid var(--text-lite);
+     overflow: hidden;
+ }
+
+ table thead {
+     font-weight: 600;
+ }
+
+ table thead th {
+     padding: 12px 16px;
+     text-align: left;
+     font-weight: 600;
+     color: var(--text);
+     border-bottom: 2px solid var(--text-lite);
+     font-family: 'Inter', sans-serif;
+     border-right: 1px solid var(--text-lite);
+ }
+
+ table thead th:last-child {
+     border-right: none;
+ }
+
+ table tbody tr {
+     border-bottom: 1px solid var(--text-lite);
+     transition: background-color 0.2s ease;
+ }
+
+ table tbody tr:last-child {
+     border-bottom: none;
+ }
+
+ table tbody tr:hover {
+     background: var(--cell-input-bg);
+ }
+
+ table tbody td {
+     padding: 10px 16px;
+     color: var(--text);
+     border-right: 1px solid var(--text-lite);
+ }
+
+ table tbody td:last-child {
+     border-right: none;
+ }
+
+ table tbody tr:nth-child(even) {
+     background: rgba(0, 0, 0, 0.02);
+ }
+
+ .theme-dark table tbody tr:nth-child(even) {
+     background: rgba(255, 255, 255, 0.02);
+ }
+
+ /* Responsive tables */
+ @media screen and (max-width: 768px) {
+     table {
+         font-size: 14px;
+     }
+     
+     table thead th,
+     table tbody td {
+         padding: 8px 12px;
+     }
+ }
+
 """
     soup.head.append(theme_style)
 
