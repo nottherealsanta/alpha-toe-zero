@@ -1,4 +1,3 @@
 - [ ] New home page with links to all notebooks
 - [ ] Add "Start here" notebook: "start here"->"mcts"->"neural nets"->"self play"->"training"
 - [ ] in "start here", advice user that because of the circular dependencies of mcts, neural nets, self play they may need to revisit notebooks
-- [ ] codemirror python syntax highlighting 

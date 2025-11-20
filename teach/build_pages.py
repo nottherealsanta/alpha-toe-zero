@@ -371,6 +371,7 @@ body, .notebook, .container {
 .thebe-output {
     padding-left: 0.5rem;
     min-height: 0;
+    font-family: var(--primary-font) !important;
 }
 
 .thebe-output:empty {
@@ -698,6 +699,8 @@ main {
      --accent: #0969da;
      --cell-input-bg: #FEFEFD;
      --cell-output-bg: transparent;
+     --primary-font: "Noto Sans", Arial, sans-serif;
+     --code-font: "Fira Code", monospace
  }
 
  .theme-dark {
@@ -918,6 +921,7 @@ main {
          padding: 8px 12px;
      }
  }
+
 
 """
     soup.head.append(theme_style)
