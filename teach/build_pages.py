@@ -1169,47 +1169,49 @@ function initializeThebe() {
             // Make the pre element editable
             const sourceDiv = cell.querySelector('.thebe-source');
             
+            // Only initialize CodeMirror if not hidden
+            if (!sourceDiv.classList.contains('hidden')) {
+                const preElement = sourceDiv.querySelector('pre');
 
-            const preElement = sourceDiv.querySelector('pre');
+                if (preElement) {
+                    const codeContent = preElement.textContent;
+                    sourceDiv.innerHTML = ''; // Clear the pre element
 
-            if (preElement) {
-                const codeContent = preElement.textContent;
-                sourceDiv.innerHTML = ''; // Clear the pre element
-
-                // Initialize CodeMirror
-                const cm = CodeMirror(sourceDiv, {
-                    value: codeContent,
-                    mode: "python",
-                    theme: "neo",
-                    lineNumbers: false,
-                    viewportMargin: Infinity,
-                    scrollbarStyle: "null",
-                    indentUnit: 4,
-                    extraKeys: {
-                        "Tab": function(cm) {
-                            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-                            cm.replaceSelection(spaces);
+                    // Initialize CodeMirror
+                    const cm = CodeMirror(sourceDiv, {
+                        value: codeContent,
+                        mode: "python",
+                        theme: "neo",
+                        lineNumbers: false,
+                        viewportMargin: Infinity,
+                        scrollbarStyle: "null",
+                        indentUnit: 4,
+                        extraKeys: {
+                            "Tab": function(cm) {
+                                var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                                cm.replaceSelection(spaces);
+                            }
                         }
-                    }
-                });
+                    });
 
-                // Style adjustments for CodeMirror to match design
-                cm.getWrapperElement().style.backgroundColor = 'var(--cell-input-bg)';
-                cm.getWrapperElement().style.border = '1px solid var(--text-lite)';
-                cm.getWrapperElement().style.paddingLeft = '1.7rem';
-                cm.getWrapperElement().style.paddingTop = '0.5rem';
-                cm.getWrapperElement().style.paddingBottom = '0.5rem';
-                cm.getWrapperElement().style.fontFamily = '"Fira Code", monospace';
-                cm.getWrapperElement().style.height = 'auto';
-                
-                // Update cell source when content changes
-                cm.on('change', function() {
-                    const cellId = `cell-${index}`;
-                    const cell = notebook.getCellById(cellId);
-                    if (cell) {
-                        cell.source = cm.getValue();
-                    }
-                });
+                    // Style adjustments for CodeMirror to match design
+                    cm.getWrapperElement().style.backgroundColor = 'var(--cell-input-bg)';
+                    cm.getWrapperElement().style.border = '1px solid var(--text-lite)';
+                    cm.getWrapperElement().style.paddingLeft = '1.7rem';
+                    cm.getWrapperElement().style.paddingTop = '0.5rem';
+                    cm.getWrapperElement().style.paddingBottom = '0.5rem';
+                    cm.getWrapperElement().style.fontFamily = '"Fira Code", monospace';
+                    cm.getWrapperElement().style.height = 'auto';
+                    
+                    // Update cell source when content changes
+                    cm.on('change', function() {
+                        const cellId = `cell-${index}`;
+                        const cell = notebook.getCellById(cellId);
+                        if (cell) {
+                            cell.source = cm.getValue();
+                        }
+                    });
+                }
             }
 
             // Add run button event listener
