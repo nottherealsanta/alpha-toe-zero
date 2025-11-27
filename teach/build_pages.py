@@ -185,9 +185,9 @@ def add_thebe_core_to_html(html_path, notebook_path):
             run_button.append(svg)
             cell_wrapper.append(run_button)
 
-        # Handle existing outputs if show-output is present
+        # Handle existing outputs
         output_wrapper = cell.find("div", class_="jp-Cell-outputWrapper")
-        if (show_output or output_only) and output_wrapper:
+        if output_wrapper:
             # Find the actual output content
             # Usually in jp-OutputArea-output
             outputs = output_wrapper.find_all("div", class_="jp-OutputArea-output")
