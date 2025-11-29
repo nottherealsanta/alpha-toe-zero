@@ -1025,6 +1025,9 @@ function initializeThebe() {
         },
     };
 
+    // Initialize cells immediately to show syntax highlighting
+    setupCells();
+
     // Create control panel
     const controlsDiv = document.createElement('div');
     controlsDiv.className = 'thebe-controls';
@@ -1101,11 +1104,24 @@ function initializeThebe() {
             // Get code blocks from the page
             codeBlocks = [];
             document.querySelectorAll('.thebe-cell').forEach((cell, index) => {
-                const sourcePre = cell.querySelector('.thebe-source pre');
-                if (sourcePre) {
+                const sourceDiv = cell.querySelector('.thebe-source');
+                let sourceCode = '';
+                
+                // Try to get code from CodeMirror instance if it exists
+                if (sourceDiv.cm) {
+                    sourceCode = sourceDiv.cm.getValue();
+                } else {
+                    // Fallback to pre tag content
+                    const sourcePre = sourceDiv.querySelector('pre');
+                    if (sourcePre) {
+                        sourceCode = sourcePre.textContent;
+                    }
+                }
+
+                if (sourceCode) {
                     codeBlocks.push({
                         id: `cell-${index}`,
-                        source: sourcePre.textContent,
+                        source: sourceCode,
                     });
                 }
             });
@@ -1133,7 +1149,7 @@ function initializeThebe() {
             restartButton.disabled = false;
 
             // Setup cells
-            setupCells();
+            // setupCells(); // Already set up on load
         } catch (error) {
             console.error('Connection error:', error);
             statusIndicator.className = 'thebe-status-indicator';
@@ -1193,6 +1209,9 @@ function initializeThebe() {
                             }
                         }
                     });
+                    
+                    // Store CodeMirror instance on the element for later retrieval
+                    sourceDiv.cm = cm;
 
                     // Style adjustments for CodeMirror to match design
                     cm.getWrapperElement().style.backgroundColor = 'var(--cell-input-bg)';
