@@ -307,7 +307,7 @@ body, .notebook, .container {
 .side-by-side-container {
     display: flex;
     flex-direction: row;
-    gap: 0rem;
+    gap: 2rem;
     width: 100%;
     margin: 1.5rem 0;
 }
@@ -527,7 +527,7 @@ body, .notebook, .container {
     width: 38px;
     height: 38px;
     padding: 0;
-    background: #ffffff77;
+    background: transparent;
     color: var(--text-lite);
     border: 0px solid var(--text-lite);
     border-radius: 0px;
