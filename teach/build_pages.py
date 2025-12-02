@@ -299,6 +299,12 @@ pre, code, .thebe-source pre, .cm-editor, .cm-content, .CodeMirror {
     line-height: 1.4;
 }
 
+/* Ensure CodeMirror lines have transparent background so selection is visible */
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
+    background: transparent !important;
+}
+
 body, .notebook, .container {
     font-family: 'Noto Sans', Arial, sans-serif !important;
 }
@@ -571,6 +577,20 @@ display: none;
     width: 2px !important;
     background-color: var(--accent) !important;
 }
+
+/* CodeMirror 5 selection styling */
+.CodeMirror-selected {
+    background: #b3d4fc !important;
+}
+
+.CodeMirror-focused .CodeMirror-selected {
+    background: #b3d4fc !important;
+}
+
+.theme-dark .CodeMirror-selected,
+.theme-dark .CodeMirror-focused .CodeMirror-selected {
+    background: rgba(88, 166, 255, 0.4) !important;
+}
 """
     soup.head.append(style_tag)
 
@@ -746,7 +766,7 @@ main {
      --text: #ffffff;
      --text-lite: #8b949e;
      --accent: #58a6ff;
-     --cell-input-bg: #171A23;
+     --cell-input-bg: #252931;
      --cell-output-bg: transparent;
  }
 
@@ -761,7 +781,7 @@ main {
      color: var(--text) !important;
  }
 
- .thebe-source pre {
+ .thebe-source > pre {
      border: 1px solid var(--text-lite);
      background: var(--cell-input-bg) !important;
      color: var(--text) !important;
@@ -1209,6 +1229,21 @@ function initializeThebe() {
                             }
                         }
                     });
+                    
+                    // Force selection styling by injecting style element
+                    const selectionStyle = document.createElement('style');
+                    selectionStyle.textContent = `
+                        .CodeMirror-selected {
+                            background: rgba(9, 105, 218, 0.35) !important;
+                        }
+                        .CodeMirror-focused .CodeMirror-selected {
+                            background: rgba(9, 105, 218, 0.35) !important;
+                        }
+                        .CodeMirror-selectionLayer {
+                            z-index: 0 !important;
+                        }
+                    `;
+                    document.head.appendChild(selectionStyle);
                     
                     // Store CodeMirror instance on the element for later retrieval
                     sourceDiv.cm = cm;
