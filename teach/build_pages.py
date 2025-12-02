@@ -770,6 +770,23 @@ main {
      --cell-output-bg: transparent;
  }
 
+.theme-dark .cm-variable {
+    color: #05b491;
+ }
+
+.theme-dark .cm-number {
+    color: #b467d5;
+}
+
+.theme-dark .cm-property, .cm-keyword {
+    color: #269cf0 !important;
+}
+
+.theme-dark .cm-string {
+    color: #fa821a;
+}
+
+
  body {
      background: var(--bg) !important;
      color: var(--text) !important;
