@@ -1073,7 +1073,7 @@ main {
      font-weight: 600;
      color: var(--text);
      border-bottom: 2px solid var(--text-lite);
-     font-family: 'Inter', sans-serif;
+     font-family: 'Noto Sans', sans-serif;
      border-right: 1px solid var(--text-lite);
  }
 
