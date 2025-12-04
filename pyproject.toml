@@ -17,4 +17,5 @@ dependencies = [
     "nbconvert>=7.16.6",
     "matplotlib>=3.10.7",
     "jupyterlab-widgets>=3.0.16",
+    "plotly>=6.5.0",
 ]
