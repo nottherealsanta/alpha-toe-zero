@@ -3,7 +3,7 @@
   <style>
     :root{
       --accent-svg: var(--accent, #0969da);
-      --muted-svg: var(--text, #1D1D20);
+      --muted-svg: var(--text, #7a7a7aff);
       --self-play-svg: var(--accent, #0969da);
       --x-svg: var(--accent, #0969da);
       --o-svg: var(--antiaccent, #DA7A09);

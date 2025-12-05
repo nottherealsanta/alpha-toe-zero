@@ -670,9 +670,11 @@ td:first-child {
 }
 
 .info-card:hover {
-  background: #f9f9f6;
+  background: var(--accent-lite);
   cursor: pointer;
 }
+
+
 
 /* Make the info-card anchor look like the card (no underline, inherit color) */
 .info-card-link {
