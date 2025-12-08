@@ -4,3 +4,5 @@
 - [ ] read only code cells
 - [ ] client cache to see first time viewers, to show them welcome modal with instructions
 - [ ] another cell tag for "show-output-after-run"
+- [ ] take aways from the video "self learning systems" by demis 
+- [ ] 
