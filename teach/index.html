@@ -51,8 +51,22 @@
     <section id="hero">
         <div id="hero-bg"></div>
         <div class="hero-content">
-            <h1>AlphaToe</h1>
+            <h1>AlphaToeZero</h1>
             <p class="subtitle">AlphaZero on Tic-Tac-Toe</p>
+        </div>
+        <div class="hero-options">
+            <div class="hero-option">
+                <p>Start Here</p>
+            </div>
+            <div class="hero-option">
+                <p>αMCTS</p>
+            </div>
+            <div class="hero-option">
+                <p>Neural Network</p>
+            </div>
+            <div class="hero-option">
+                <p>Self-Play</p>
+            </div>
         </div>
     </section>
     <!-- qubic game board -->
@@ -139,50 +153,68 @@
             <h2>Three ideas to know aboutAlphaZero</h2>
             <div class="info-cards">
                 <a href="./pages/mcts.html" class="info-card-link" aria-label="Open αMCTS page">
-                <div class="info-card">
-                    <div class="card-content">
-                        <h3>αMCTS</h3>
-                        <p>MCTS is a search algorithm that explores the game tree by running many simulations. Unlike
-                            traditional MCTS, AlphaZero's version uses its neural network to guide the search.</p>
+                    <div class="info-card">
+                        <div class="card-content">
+                            <h3>αMCTS</h3>
+                            <p>MCTS is a search algorithm that explores the game tree by running many simulations.
+                                Unlike
+                                traditional MCTS, AlphaZero's version uses its neural network to guide the search.</p>
+                        </div>
+                        <div class="card-image">
+                            <img alt="αMCTS — Alpha Monte Carlo Tree Search" src="./assets/alpha-mcts.svg" />
+                        </div>
+                        <div class="card-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-arrow-right-icon lucide-arrow-right">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="card-image">
-                        <img alt="αMCTS — Alpha Monte Carlo Tree Search" src="./assets/alpha-mcts.svg" />
-                    </div>
-                    <div class="card-arrow">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-icon lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                    </div>
-                </div>
                 </a>
                 <a href="./pages/nn.html" class="info-card-link" aria-label="Open nn page">
-                <div class="info-card">
-                    <div class="card-content">
-                        <h3>Neural Network</h3>
-                        <p>It has two main functions: to suggest the most promising moves from the current position
-                            (policy head), and to estimate the chances of winning from that position (value head).</p>
+                    <div class="info-card">
+                        <div class="card-content">
+                            <h3>Neural Network</h3>
+                            <p>It has two main functions: to suggest the most promising moves from the current position
+                                (policy head), and to estimate the chances of winning from that position (value head).
+                            </p>
                         </div>
                         <div class="card-image">
                             <img alt="Neural Network" src="./assets/neural-net.svg" />
                         </div>
                         <div class="card-arrow">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-icon lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-arrow-right-icon lucide-arrow-right">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </div>
                     </div>
-                </div>
                 </a>
 
                 <a href="./pages/self-play.html" class="info-card-link" aria-label="Open self-play page">
-                <div class="info-card">
-                    <div class="card-content">
-                        <h3>Self-Play</h3>
-                        <p>The model learns by playing against itself, starting with no knowledge of the game. Multiple
-                            games are played at every iteration, and at every iteration the model learns. </p>
+                    <div class="info-card">
+                        <div class="card-content">
+                            <h3>Self-Play</h3>
+                            <p>The model learns by playing against itself, starting with no knowledge of the game.
+                                Multiple
+                                games are played at every iteration, and at every iteration the model learns. </p>
+                        </div>
+                        <div class="card-image">
+                            <img alt="Self-Play" src="./assets/self-play.svg" />
+                        </div>
+                        <div class="card-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-arrow-right-icon lucide-arrow-right">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="card-image">
-                        <img alt="Self-Play" src="./assets/self-play.svg" />
-                    </div>
-                    <div class="card-arrow">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-icon lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
