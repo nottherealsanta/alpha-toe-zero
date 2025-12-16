@@ -4,7 +4,7 @@
 
 This project includes a high-performance training pipeline, a CLI for interacting with models, and a modern web-based interactive explainer.
 
-**[Live Demo](https://www.google.com/search?q=https://alpha-toe-zero.nottherealsanta.com)** 
+**[Live Demo](https://alpha-toe-zero.nottherealsanta.com)** 
 -----
 
 ## 🌟 Key Features
