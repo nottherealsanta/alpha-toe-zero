@@ -1,6 +1,6 @@
 # Alpha-Toe-Zero
 
-**Alpha-Toe-Zero** is a clean, educational implementation of DeepMind's [AlphaZero](https://www.google.com/search?q=https://deepmind.com/blog/article/alphazero-shedding-new-light-on-chess-shogi-and-go) algorithm. It masters **Tic-Tac-Toe (2D)** and **4x4x4 3D Tic-Tac-Toe** entirely through self-play reinforcement learning, starting with zero human knowledge.
+**Alpha-Toe-Zero** is a clean, educational implementation of DeepMind's [AlphaZero](https://deepmind.google/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/) algorithm. It masters **Tic-Tac-Toe (2D)** and **4x4x4 3D Tic-Tac-Toe** entirely through self-play reinforcement learning, starting with zero human knowledge.
 
 This project includes a high-performance training pipeline, a CLI for interacting with models, and a modern web-based interactive explainer.
 
