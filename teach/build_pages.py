@@ -1199,7 +1199,7 @@ function initializeThebe() {
     const LOCAL_OPTIONS = {
         serverSettings: {
             baseUrl: 'http://localhost:8888',
-            token: '_2Vk7^D9sIsXCyu%"(Y(D~{aVL[d]',
+            token: 'M6sJCCqZFSk5',
         },
         kernelOptions: {
             kernelName: 'python3',
@@ -1585,14 +1585,19 @@ function initializeThebe() {
     fv_h2.string = "Welcome to Alpha Toe Zero!"
     
     fv_p1 = soup.new_tag("p")
-    fv_p1.string = "To interact with the code and run simulations, you need to run a local Jupyter server. Please run the following command in your terminal:"
+    fv_p1.append("To interact with the code and run simulations, you need to run a local Jupyter server. Please run the following command in your terminal:")
+    fv_p1.append(soup.new_tag("br"))
+    fv_p1.append(soup.new_tag("br"))
+    warning_strong = soup.new_tag("strong")
+    warning_strong.string = "Note: This setup is currently not secure. I am exploring options to make this more secure."
+    fv_p1.append(warning_strong)
     
     fv_cmd_box = soup.new_tag("div")
     fv_cmd_box["class"] = "command-box"
     
     fv_pre = soup.new_tag("pre")
     fv_pre["id"] = "server-command"
-    fv_pre.string = """uvx -p 3.11 -w torch -w numpy jupyter lab --NotebookApp.token=_2Vk7^D9sIsXCyu%"(Y(D~{aVL[d] --NotebookApp.allow_origin='https://alpha-toe-zero.nottherealsanta.com/' --no-browser"""
+    fv_pre.string = """uvx -p 3.11 -w torch -w numpy jupyter lab --ServerApp.token=M6sJCCqZFSk5 --ServerApp.allow_origin='https://alpha-toe-zero.nottherealsanta.com' --ServerApp.disable_check_xsrf=True --no-browser"""
     
     fv_copy_btn = soup.new_tag("button")
     fv_copy_btn["class"] = "copy-btn"
