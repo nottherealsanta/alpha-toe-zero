@@ -1717,7 +1717,7 @@ function initializeThebe() {
     
     fv_pre = soup.new_tag("pre")
     fv_pre["id"] = "server-command"
-    fv_pre.string = """uvx -p 3.11 -w torch -w numpy jupyter lab --ServerApp.token=M6sJCCqZFSk5 --ServerApp.allow_origin='https://alpha-toe-zero.nottherealsanta.com' --ServerApp.disable_check_xsrf=True --no-browser"""
+    fv_pre.string = """uvx -p 3.11 --with torch --with numpy jupyter lab --ServerApp.token=M6sJCCqZFSk5 --ServerApp.allow_origin='https://alpha-toe-zero.nottherealsanta.com' --ServerApp.disable_check_xsrf=True --no-browser"""
     
     fv_copy_btn = soup.new_tag("button")
     fv_copy_btn["class"] = "copy-btn"
