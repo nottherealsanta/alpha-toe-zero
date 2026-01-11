@@ -1,0 +1,11 @@
+services:
+  teach-site:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alpha-toe-teach
+    ports:
+      - "1122:1122"
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
